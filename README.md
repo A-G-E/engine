@@ -1,2 +1,2 @@
-# A.G.E.
+# A.G.E
 Atomic Game Engine
