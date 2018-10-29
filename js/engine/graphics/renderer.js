@@ -121,6 +121,8 @@ export default class Renderer
     set program(p)
     {
         this._program = p;
+        
+        this._context.useProgram(p.program);
     }
     
     static get playing()

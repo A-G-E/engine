@@ -11,32 +11,14 @@ export default class Matrix4
 
     multiply(matrix)
     {
+        if(!(matrix instanceof Matrix4))
+        {
+            return null;
+        }
+        
         let a = this._points;
         let b = matrix._points;
         
-        // this.print();
-        // matrix.print();
-
-        
-        
-        
-        
-
-        
-        
-        
-        
-
-        
-        
-        
-        
-
-        
-        
-        
-        
-
         return new Matrix4([
             a[0] * b[ 0] + a[4] * b[ 1] + a[ 8] * b[ 2] + a[12] * b[ 3],
             a[1] * b[ 0] + a[5] * b[ 1] + a[ 9] * b[ 2] + a[13] * b[ 3],
@@ -63,6 +45,34 @@ export default class Matrix4
     translate(vector)
     {
         return this.multiply(Matrix4.translation(vector));
+    }
+    
+    rotate(degrees, axis)
+    {
+        let m = Matrix4.rotation(degrees, axis).points;
+        let p = this._points;
+        
+        return new Matrix4([
+            p[ 0] * m[ 0] + p[ 4] * m[ 1] + p[ 8] * m[ 3],
+            p[ 1] * m[ 0] + p[ 5] * m[ 1] + p[ 9] * m[ 3],
+            p[ 2] * m[ 0] + p[ 6] * m[ 1] + p[10] * m[ 3],
+            p[ 3] * m[ 0] + p[ 7] * m[ 1] + p[11] * m[ 3],
+            
+            p[ 0] * m[ 4] + p[ 4] * m[ 5] + p[ 8] * m[ 6],
+            p[ 1] * m[ 4] + p[ 5] * m[ 5] + p[ 9] * m[ 6],
+            p[ 2] * m[ 4] + p[ 6] * m[ 5] + p[10] * m[ 6],
+            p[ 3] * m[ 4] + p[ 7] * m[ 5] + p[11] * m[ 6],
+            
+            p[ 0] * m[ 8] + p[ 4] * m[ 9] + p[ 8] * m[10],
+            p[ 1] * m[ 8] + p[ 5] * m[ 9] + p[ 9] * m[10],
+            p[ 2] * m[ 8] + p[ 6] * m[ 9] + p[10] * m[10],
+            p[ 3] * m[ 8] + p[ 7] * m[ 9] + p[11] * m[10],
+            
+            p[12],
+            p[13],
+            p[14],
+            p[15],
+        ]);
     }
 
     scale(vector)
@@ -105,10 +115,10 @@ export default class Matrix4
         }
         
         return new Matrix4([
-            f / aspect, 0, 0,   0,
-            f,          0, 0,   0,
+            f / aspect, 0,   0,  0,
+            0,          f,   0,  0,
             0,          0, m22, -1,
-            0,          0, m32, 0,
+            0,          0, m32,  0,
         ]);
     }
 
@@ -122,7 +132,6 @@ export default class Matrix4
         ]);
     }
 
-
     static lookAt(eye, center, up)
     {
         if([eye, center, up].some(v => (v instanceof Vector3) !== true))
@@ -130,7 +139,6 @@ export default class Matrix4
             throw new Error('Expected 3 Vector3\'s got something else');
         }
     
-        const epsilon = 0.000001;
         let
             x0, x1, x2, x3,
             y0, y1, y2, y3,
@@ -141,7 +149,7 @@ export default class Matrix4
         z1 = eye.y - center.y;
         z2 = eye.z - center.z;
         
-        if([ z0, z1, z2 ].every(v => Math.abs(v) < epsilon))
+        if([ z0, z1, z2 ].every(v => Math.abs(v) < Matrix4.epsilon))
         {
             return Matrix4.identity;
         }
@@ -213,6 +221,28 @@ export default class Matrix4
             x, y, z, 1,
         ]);
     }
+    
+    static rotation(degrees, axis)
+    {
+        if(axis.magnitude < Matrix4.epsilon)
+        {
+            return null;
+        }
+        
+        axis = axis.multiply(1 / axis.magnitude);
+        
+        let s = Math.sin(degrees * Math.PI / 180);
+        let c = Math.cos(degrees * Math.PI / 180);
+        let t = 1 - c;
+        let { x, y, z} = axis;
+        
+        return new Matrix4([
+            x * x * t + c,      y * x * t + z * s,   z * x * t - y * s,     0,
+            x * y * t - z * s,  y * y * t + c,       z * y * t + x * s,     0,
+            x * z * t + y * s,  y * z * t - x * s,   z * z * t + c,         0,
+            0,                  0,                   0,                     0,
+        ]);
+    }
 
     static scaling(vector)
     {
@@ -234,5 +264,10 @@ export default class Matrix4
             0, 0, 1, 0,
             0, 0, 0, 1,
         ]);
+    }
+    
+    static get epsilon()
+    {
+        return 0.000001;
     }
 }

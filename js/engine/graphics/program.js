@@ -102,11 +102,7 @@ export default class Program
                             ];
                         }
     
-                        let m = `uniform${t}${type.match(/[0-9]/)}fv`;
-    
-                        console.log(p, v, m, a);
-    
-                        self.gl[m](...a);
+                        self.gl[`uniform${t}${type.match(/[0-9]/)}fv`](...a);
                         
                         return true;
                         
