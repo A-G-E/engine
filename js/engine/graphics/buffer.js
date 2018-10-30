@@ -2,33 +2,18 @@
 
 export default class Buffer
 {
-    constructor(renderer, key, size)
+    constructor(renderer, attributes, type = null)
     {
         this.gl = renderer.gl;
-        this._key = key;
-        this._size = size;
+        this._attributes = attributes;
+        this._type = type || this.gl.ARRAY_BUFFER;
         this._renderer = renderer;
         this._buffer = this.gl.createBuffer();
     }
 
     bind()
     {
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this._buffer);
-    }
-
-    activate()
-    {
-        this.bind();
-        
-        this.gl.vertexAttribPointer(
-            this._renderer.program[this._key],
-            this._size,
-            this.gl.FLOAT,
-            false,
-            this._size * Float32Array.BYTES_PER_ELEMENT,
-            0
-        );
-        this.gl.enableVertexAttribArray(this._renderer.program[this._key]);
+        this.gl.bindBuffer(this._type, this._buffer);
     }
     
     get buffer()
@@ -36,10 +21,27 @@ export default class Buffer
         return this._buffer;
     }
 
-    set data(vertices)
+    set data(data)
     {
         this.bind();
 
-        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(vertices), this.gl.STATIC_DRAW);
+        this.gl.bufferData(this._type, data, this.gl.STATIC_DRAW);
+        
+        let offset = 0;
+        
+        for(let [ key, size ] of this._attributes)
+        {
+            this.gl.vertexAttribPointer(
+                key,
+                size,
+                this.gl.FLOAT,
+                false,
+                size * Float32Array.BYTES_PER_ELEMENT,
+                offset
+            );
+            this.gl.enableVertexAttribArray(key);
+            
+            offset += size * Float32Array.BYTES_PER_ELEMENT
+        }
     }
 }

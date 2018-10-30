@@ -16,7 +16,7 @@ export default class Renderer
         context.enable(context.DEPTH_TEST);
         context.enable(context.CULL_FACE);
         context.frontFace(context.CCW);
-        context.cullFace(context.BACK);
+        context.cullFace(context.FRONT);
     
         this._owner = owner;
         this._canvas = canvas;

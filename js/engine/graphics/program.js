@@ -11,10 +11,7 @@ export default class Program
         this._program = this.gl.createProgram();
         this._variables = {};
         
-        for(let s of shaders)
-        {
-            this.attach(s);
-        }
+        shaders.forEach(s => this.attach(s));
 
         this.gl.linkProgram(this._program);
         
@@ -37,12 +34,6 @@ export default class Program
                 .map(l => l.trim().match(/^(attribute|uniform)\s+([a-z][a-z0-9]+)\s+([a-zA-Z0-9_]+);$/))
                 .filter(l => l !== null)
             ).reduce((t, a) => [ ...t, ...a ]);
-    
-        this._info = {
-            program: this._program,
-            attribute: {},
-            uniform: {},
-        };
         
         for(let [, modifier, type, name] of matches)
         {
@@ -142,10 +133,5 @@ export default class Program
     get program()
     {
         return this._program;
-    }
-
-    get info()
-    {
-        return this._info;
     }
 }

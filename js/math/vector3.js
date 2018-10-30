@@ -1,6 +1,7 @@
 'use strict';
 
 import Vector2 from './vector2.js';
+import Plane from './plane.js';
 
 export default class Vector3
 {
@@ -184,6 +185,11 @@ export default class Vector3
         return new Vector2(this.x, this.y);
     }
 
+    get values()
+    {
+        return [this.x, this.y, this.z];
+    }
+
     get magnitude()
     {
         return Math.sqrt(this.x ** 2 + this.y ** 2 + this.z ** 2);
@@ -207,5 +213,10 @@ export default class Vector3
     static get normalized()
     {
         return new Vector3(Math.sqrt(3));
+    }
+
+    static normalFromPoints(a, b, c)
+    {
+        return new Plane(b.subtract(a), c.subtract(a)).normal;
     }
 }
