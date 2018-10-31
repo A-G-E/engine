@@ -13,10 +13,10 @@ export default class Renderer
     
         const context = canvas.getContext('webgl');
         context.clearColor(0.75, 0.85, 0.8, 1);
-        context.enable(context.DEPTH_TEST);
-        context.enable(context.CULL_FACE);
-        context.frontFace(context.CCW);
-        context.cullFace(context.FRONT);
+        // context.enable(context.DEPTH_TEST);
+        // context.enable(context.CULL_FACE);
+        // context.frontFace(context.CCW);
+        // context.cullFace(context.FRONT);
     
         this._owner = owner;
         this._canvas = canvas;

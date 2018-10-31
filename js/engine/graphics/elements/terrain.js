@@ -38,6 +38,7 @@ export default class Terrain
             let colors = [], normals = [], vertices = [], y = 1.0;
             let r = .5;
             let a = 7.5;
+            let i = 0;
             let map = (s, e, v) => s + (e - s) * v;
             // let color = z => {
             //     let i = biome.findIndex(v => v[0] >= z);
@@ -60,6 +61,7 @@ export default class Terrain
             // let vertex = (x, y) => new Vector3(x, perlin(x * r, y * r), y);
             let vertex = (x, y) => new Vector3(x, 0, y);
             let color = (x, y) => new Vector3(x / size.x, 0, y / size.y);
+            let buffer = (vertex, normal, color) => this.buffer.push(...vertex, ...normal, ...color);
             let gridSquare = (row, col) => {
                 let vertices = [
                     vertex(col    , row    ),
@@ -88,53 +90,78 @@ export default class Terrain
                 for(let x = 0.0; x < size.x; x++)
                 {
                     // buffer vertices
-                    if(z < size.y - 1)
                     {
                         let {vertices, colors, normals} = gridSquare(z, x);
     
-                        console.log('top-left');
-                        this.buffer.push(...vertices[0], ...normals[0], ...colors[0]);
+                        // top-left
+                        buffer(vertices[0], normals[0], colors[0]);
     
-                        if(z !== size.y - 2 || x === size.x - 2)
+                        if((z !== size.y - 1 || x === size.x - 1))
                         {
-                            console.log('top-right');
-                            this.buffer.push(...vertices[2], ...normals[1], ...colors[2]);
-                        }
-                    }
-                    else
-                    {
-                        if(x === 0)
-                        {
-                            console.log('bottom-left');
-                            this.buffer.push(...vertices[1], ...normals[0], ...colors[1]);
+                            // top-right
+                            buffer(vertices[2], normals[1], colors[2]);
                         }
     
-                        console.log('bottom-right');
-                        this.buffer.push(...vertices[3], ...normals[1], ...colors[3]);
+                        if(z === size.y - 1)
+                        {
+                            if(x === 0)
+                            {
+                                // bottom-left
+                                buffer(vertices[1], normals[0], colors[1]);
+                            }
+        
+                            // bottom-right
+                            buffer(vertices[3], normals[1], colors[3]);
+                        }
                     }
                     
                     // buffer indices
-                    this.indices.push(
-                        z * size.x + x,
-                        (z + 1) * size.x + x,
-                        (z + (x % 2 ^ z % 2)) * size.x + x + 1
-                    );
-                    
-                    if(z < size.y - 1)
                     {
-                        this.indices.push(
-                            z * size.x + x + 1,
-                            (z + !(x % 2 ^ z % 2)) * size.x + x,
-                            (z + 1) * size.x + x + 1
-                        );
-                    }
-                    else
-                    {
-                        this.indices.push(
-                            (z + 1) * size.x + x + 1,
-                            z * size.x + x + 1,
-                            (z + !(x % 2 ^ z % 2)) * size.x + x + 1
-                        );
+                        let i = (col, row) => row * (size.x + (row < size.y ? size.x : 1)) + col * (row < size.y - 1 ? 2 : 1) + (row === size.y);
+                        let indices = [ [ 0, 0, 0 ], [ 0, 0, 0 ] ];
+                        let vertices = [
+                            i(x, z),         // top-left
+                            i(x, z) + 1,     // top-right
+                            i(x, z + 1),     // bottom-left
+                            i(x, z + 1) + 1, // bottom-right
+                        ];
+                        
+                        switch((z % 2) * 2 + x % 2)
+                        {
+                            case 0:
+                                indices = [
+                                    0, 2, 3,
+                                    1, 3, 0,
+                                ];
+                                break;
+                            case 1:
+                                indices = [
+                                    0, 2, 1,
+                                    1, 3, 2,
+                                ];
+                                break;
+                            case 2:
+                                indices = [
+                                    1, 3, 2,
+                                    0, 1, 2,
+                                ];
+                                break;
+                            case 3:
+                                indices = [
+                                    1, 3, 0,
+                                    0, 2, 3,
+                                ];
+                                break;
+                        }
+    
+                        if(z === size.y - 1)
+                        {
+                            let t = indices[0];
+                            indices[0] = indices[1];
+                            indices[1] = t;
+                        }
+    
+                        this.indices.push(...indices.map(i => vertices[i]));
                     }
                 }
             }
@@ -153,7 +180,7 @@ export default class Terrain
             
             let world = Matrix4.identity
                 // .rotate(90, new Vector3(1, 0, 0))
-                .translate(new Vector3(-size.x / 2, 0, -size.y / 2));
+                // .translate(new Vector3(-size.x / 2, 0, -size.y / 2));
     
             this.program.world = world.points;
             this.program.view = view.points;
@@ -177,6 +204,6 @@ export default class Terrain
         //     .points;
     
         // renderer.gl.drawArrays(renderer.gl.TRIANGLES, 0, this.size.x * this.size.y / 3);
-        renderer.gl.drawElements(renderer.gl.TRIANGLES, this.indices.length, renderer.gl.UNSIGNED_BYTE, 0);
+        renderer.gl.drawElements(renderer.gl.TRIANGLES, this.indices.length, renderer.gl.UNSIGNED_SHORT, 0);
     }
 }
