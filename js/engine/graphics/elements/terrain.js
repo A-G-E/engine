@@ -61,6 +61,7 @@ export default class Terrain
             // let vertex = (x, y) => new Vector3(x, perlin(x * r, y * r), y);
             let vertex = (x, y) => new Vector3(x, 0, y);
             let color = (x, y) => new Vector3(x / size.x, 0, y / size.y);
+            // let buffer = (vertex, normal, color) => this.buffer.push(`${vertex.x},${vertex.z}`);
             let buffer = (vertex, normal, color) => this.buffer.push(...vertex, ...normal, ...color);
             let gridSquare = (row, col) => {
                 let vertices = [
@@ -84,6 +85,7 @@ export default class Terrain
                 
                 return { vertices, colors, normals };
             };
+            let lastRow = [];
             
             for(let z = 0.0; z < size.y; z++)
             {
@@ -107,11 +109,11 @@ export default class Terrain
                             if(x === 0)
                             {
                                 // bottom-left
-                                buffer(vertices[1], normals[0], colors[1]);
+                                lastRow.push([vertices[1], normals[0], colors[1]]);
                             }
         
                             // bottom-right
-                            buffer(vertices[3], normals[1], colors[3]);
+                            lastRow.push([vertices[3], normals[1], colors[3]]);
                         }
                     }
                     
@@ -166,6 +168,14 @@ export default class Terrain
                 }
             }
             
+            for(let x of lastRow)
+            {
+                buffer(...x);
+            }
+            
+            // console.log(this.buffer);
+            // return;
+            
             let bv = new Buffer(renderer, [
                 [ this.program['vertex'], 3 ],
                 [ this.program['normal'], 3 ],
@@ -179,7 +189,7 @@ export default class Terrain
             bi.data = new Uint16Array(this.indices);
             
             let world = Matrix4.identity
-                // .rotate(90, new Vector3(1, 0, 0))
+                .rotate(60, new Vector3(1, 0, 0))
                 // .translate(new Vector3(-size.x / 2, 0, -size.y / 2));
     
             this.program.world = world.points;
