@@ -61,26 +61,26 @@ export default class Terrain
             // let vertex = (x, y) => new Vector3(x, perlin(x * r, y * r), y);
             let vertex = (x, y) => new Vector3(x, 0, y);
             let color = (x, y) => new Vector3(x / size.x, 0, y / size.y);
-            // let buffer = (vertex, normal, color) => this.buffer.push(`${vertex.x},${vertex.z}`);
+            // let buffer = (vertex, normal, color) => this.buffer.push(`${vertex.x},${vertex.z}`, vertex, normal.multiply(-1), color);
+            // let buffer = (vertex, normal, color) => this.buffer.push(color);
             let buffer = (vertex, normal, color) => this.buffer.push(...vertex, ...normal, ...color);
-            let gridSquare = (row, col) => {
+            let gridSquare = (row, col, indices) => {
                 let vertices = [
                     vertex(col    , row    ),
-                    vertex(col    , row + 1),
                     vertex(col + 1, row    ),
+                    vertex(col    , row + 1),
                     vertex(col + 1, row + 1),
                 ];
                 let colors = [
                     color(col    , row    ),
-                    color(col    , row + 1),
                     color(col + 1, row    ),
+                    color(col    , row + 1),
                     color(col + 1, row + 1),
                 ];
-                let righthanded = col % 2 ^ row % 2;
                 
                 let normals = [
-                    Vector3.normalFromPoints(vertices[0], vertices[1], vertices[righthanded ? 3 : 2]),
-                    Vector3.normalFromPoints(vertices[2], vertices[righthanded ? 0 : 1], vertices[3]),
+                    Vector3.normalFromPoints(vertices[indices[0]], vertices[indices[1]], vertices[indices[2]]),
+                    Vector3.normalFromPoints(vertices[indices[3]], vertices[indices[4]], vertices[indices[5]]),
                 ];
                 
                 return { vertices, colors, normals };
@@ -91,36 +91,16 @@ export default class Terrain
             {
                 for(let x = 0.0; x < size.x; x++)
                 {
-                    // buffer vertices
-                    {
-                        let {vertices, colors, normals} = gridSquare(z, x);
-    
-                        // top-left
-                        buffer(vertices[0], normals[0], colors[0]);
-    
-                        if((z !== size.y - 1 || x === size.x - 1))
-                        {
-                            // top-right
-                            buffer(vertices[2], normals[1], colors[2]);
-                        }
-    
-                        if(z === size.y - 1)
-                        {
-                            if(x === 0)
-                            {
-                                // bottom-left
-                                lastRow.push([vertices[1], normals[0], colors[1]]);
-                            }
-        
-                            // bottom-right
-                            lastRow.push([vertices[3], normals[1], colors[3]]);
-                        }
-                    }
+                    let indices = [];
                     
                     // buffer indices
                     {
-                        let i = (col, row) => row * (size.x + (row < size.y ? size.x : 1)) + col * (row < size.y - 1 ? 2 : 1) + (row === size.y);
-                        let indices = [ [ 0, 0, 0 ], [ 0, 0, 0 ] ];
+                        let i = (col, row) => {
+                            let doubleRows = Math.min(row, size.y - 1) * (size.x - 1);
+                            let column = col * (row < size.y - 1 ? 2 : 1);
+                            
+                            return row * (size.x + 1) + doubleRows + column;
+                        };
                         let vertices = [
                             i(x, z),         // top-left
                             i(x, z) + 1,     // top-right
@@ -163,7 +143,34 @@ export default class Terrain
                             indices[1] = t;
                         }
     
+                        // this.indices.push(indices.map(i => vertices[i]).join(','));
                         this.indices.push(...indices.map(i => vertices[i]));
+                    }
+                    
+                    // buffer vertices
+                    {
+                        let {vertices, colors, normals} = gridSquare(z, x, indices);
+    
+                        // top-left
+                        buffer(vertices[0], normals[0], colors[0]);
+    
+                        if((z !== size.y - 1 || x === size.x - 1))
+                        {
+                            // top-right
+                            buffer(vertices[1], normals[1], colors[1]);
+                        }
+    
+                        if(z === size.y - 1)
+                        {
+                            if(x === 0)
+                            {
+                                // bottom-left
+                                lastRow.push([vertices[2], normals[0], colors[2]]);
+                            }
+        
+                            // bottom-right
+                            lastRow.push([vertices[3], normals[1], colors[3]]);
+                        }
                     }
                 }
             }
@@ -173,7 +180,7 @@ export default class Terrain
                 buffer(...x);
             }
             
-            // console.log(this.buffer);
+            // console.log(this.buffer, this.indices);
             // return;
             
             let bv = new Buffer(renderer, [
@@ -183,13 +190,11 @@ export default class Terrain
             ]);
             bv.data = new Float32Array(this.buffer);
             
-            let bi = new Buffer(renderer, [
-                [ this.program['index'], 3 ],
-            ], renderer.gl.ELEMENT_ARRAY_BUFFER);
+            let bi = new Buffer(renderer, [], renderer.gl.ELEMENT_ARRAY_BUFFER);
             bi.data = new Uint16Array(this.indices);
             
             let world = Matrix4.identity
-                .rotate(60, new Vector3(1, 0, 0))
+                // .rotate(60, new Vector3(1, 0, 0))
                 // .translate(new Vector3(-size.x / 2, 0, -size.y / 2));
     
             this.program.world = world.points;

@@ -24,12 +24,19 @@ export default class Buffer
     set data(data)
     {
         this.bind();
-
+        
         this.gl.bufferData(this._type, data, this.gl.STATIC_DRAW);
+        
+        let attributes = this._attributes.filter(i => i[0] !== undefined);
+        
+        if(attributes.length === 0)
+        {
+            return;
+        }
         
         let offset = 0;
         
-        for(let [ key, size ] of this._attributes)
+        for(let [ key, size ] of attributes)
         {
             this.gl.vertexAttribPointer(
                 key,
@@ -41,7 +48,7 @@ export default class Buffer
             );
             this.gl.enableVertexAttribArray(key);
             
-            offset += size * Float32Array.BYTES_PER_ELEMENT
+            offset += size * Float32Array.BYTES_PER_ELEMENT;
         }
     }
 }

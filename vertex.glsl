@@ -12,9 +12,9 @@ varying vec3 fragColor;
 varying vec3 lighting;
 
 void main() {
-    fragColor = color;
-    gl_Position = world * vec4(vertex, 1.0);
-//    gl_Position = projection * view * world * vec4(vertex, 1.0);
+//    gl_Position = world * vec4(vertex, 1.0);
+    gl_Position = projection * view * world * vec4(vertex, 1.0);
 
     lighting = vec3(1, 1, 1) * normal;//ambientLight + (directionalLightColor * directional);
+    fragColor = color;
 }
