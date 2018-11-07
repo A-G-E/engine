@@ -35,34 +35,27 @@ export default class Terrain
                 [.8, 178, 110,   0 ],
                 [ 1, 255, 255, 255 ],
             ];
-            let colors = [], normals = [], vertices = [], y = 1.0;
-            let r = .5;
-            let a = 7.5;
-            let i = 0;
+            let r = .25;
+            let a = 2.5;
             let map = (s, e, v) => s + (e - s) * v;
-            // let color = z => {
-            //     let i = biome.findIndex(v => v[0] >= z);
-            //
-            //     if(i === 0)
-            //     {
-            //         return biome[i].slice(1);
-            //     }
-            //
-            //     let v1 = biome[i - 1];
-            //     let v2 = biome[i];
-            //
-            //     return [
-            //         map(v1[1], v2[1], z) / 255,
-            //         map(v1[2], v2[2], z) / 255,
-            //         map(v1[3], v2[3], z) / 255,
-            //     ];
-            // };
-            
-            // let vertex = (x, y) => new Vector3(x, perlin(x * r, y * r), y);
-            let vertex = (x, y) => new Vector3(x, 0, y);
-            let color = (x, y) => new Vector3(x / size.x, 0, y / size.y);
-            // let buffer = (vertex, normal, color) => this.buffer.push(`${vertex.x},${vertex.z}`, vertex, normal.multiply(-1), color);
-            // let buffer = (vertex, normal, color) => this.buffer.push(color);
+            let color = z => {
+                let i = biome.findIndex(v => v[0] >= z);
+
+                if(i === 0)
+                {
+                    return new Vector3(...biome[i].slice(1));
+                }
+
+                let v1 = biome[i - 1];
+                let v2 = biome[i];
+
+                return new Vector3(
+                    map(v1[1], v2[1], z) / 255,
+                    map(v1[2], v2[2], z) / 255,
+                    map(v1[3], v2[3], z) / 255
+                );
+            };
+            let vertex = (x, y) => new Vector3(x, perlin(x * r, y * r), y);
             let buffer = (vertex, normal, color) => this.buffer.push(...vertex, ...normal, ...color);
             let gridSquare = (row, col, indices) => {
                 let vertices = [
@@ -72,11 +65,17 @@ export default class Terrain
                     vertex(col + 1, row + 1),
                 ];
                 let colors = [
-                    color(col    , row    ),
-                    color(col + 1, row    ),
-                    color(col    , row + 1),
-                    color(col + 1, row + 1),
+                    color(vertices[1].y),
+                    color(vertices[1].y),
+                    color(vertices[1].y),
+                    color(vertices[1].y),
                 ];
+                
+                vertices.forEach(v => {
+                    v.x += (perlin(v.y, v.z) - .5) / 2;
+                    v.z += (perlin(v.x, v.y) - .5) / 2;
+                    v.y *= a;
+                });
                 
                 let normals = [
                     Vector3.normalFromPoints(vertices[indices[0]], vertices[indices[1]], vertices[indices[2]]),
@@ -180,9 +179,6 @@ export default class Terrain
                 buffer(...x);
             }
             
-            // console.log(this.buffer, this.indices);
-            // return;
-            
             let bv = new Buffer(renderer, [
                 [ this.program['vertex'], 3 ],
                 [ this.program['normal'], 3 ],
@@ -194,12 +190,15 @@ export default class Terrain
             bi.data = new Uint16Array(this.indices);
             
             let world = Matrix4.identity
-                // .rotate(60, new Vector3(1, 0, 0))
-                // .translate(new Vector3(-size.x / 2, 0, -size.y / 2));
+                .rotate(60, new Vector3(1, 0, 0))
+                .translate(new Vector3(-size.x / 2, 0, -size.y / 2));
     
             this.program.world = world.points;
             this.program.view = view.points;
             this.program.projection = projection.points;
+            this.program.lightDirection = new Vector3(.3, -1, .5).points;
+            this.program.lightColour = new Vector3(1, .8, .8).points;
+            this.program.lightBias = new Vector2(.3, .8).points;
             
             this.loaded = true;
         });

@@ -92,6 +92,8 @@ export default class Program
                                 v
                             ];
                         }
+                        
+                        console.log(a);
     
                         self.gl[`uniform${t}${type.match(/[0-9]/)}fv`](...a);
                         

@@ -100,6 +100,11 @@ export default class Vector2 {
     {
         this._y = y;
     }
+    
+    get points()
+    {
+        return [ this.x, this.y ];
+    }
 
     get magnitude()
     {

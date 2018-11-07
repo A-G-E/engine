@@ -35,6 +35,7 @@ export default class Buffer
         }
         
         let offset = 0;
+        let total = attributes.map(a => a[1]).sum();
         
         for(let [ key, size ] of attributes)
         {
@@ -43,12 +44,12 @@ export default class Buffer
                 size,
                 this.gl.FLOAT,
                 false,
-                size * Float32Array.BYTES_PER_ELEMENT,
-                offset
+                total * Float32Array.BYTES_PER_ELEMENT,
+                offset * Float32Array.BYTES_PER_ELEMENT
             );
             this.gl.enableVertexAttribArray(key);
             
-            offset += size * Float32Array.BYTES_PER_ELEMENT;
+            offset += size;
         }
     }
 }

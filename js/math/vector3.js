@@ -185,6 +185,11 @@ export default class Vector3
         return new Vector2(this.x, this.y);
     }
 
+    get points()
+    {
+        return [this.x, this.y, this.z];
+    }
+
     get values()
     {
         return [this.x, this.y, this.z];
