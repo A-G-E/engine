@@ -10,14 +10,14 @@ export default class Game extends HTMLElement
     {
         super();
     }
-    
+
     connectedCallback()
     {
         const shadowRoot = this.attachShadow({mode: 'open'});
         const renderer = new Renderer(this);
-    
+
         shadowRoot.appendChild(renderer.canvas);
-    
+
         let view = Matrix4.lookAt(
             new Vector3(0, 0, -15),
             new Vector3(0, 0, 0),
@@ -26,7 +26,7 @@ export default class Game extends HTMLElement
         let projection = Matrix4.perspective(90 * Math.PI / 180, this.clientWidth / this.clientHeight, 0.1, 1000.0);
         // let terrain = new Terrain(renderer, new Vector2(1, 1), view, projection);
         let terrain = new Terrain(renderer, new Vector2(20, 20), view, projection);
-    
+
         renderer.add(terrain);
         renderer.play();
     }

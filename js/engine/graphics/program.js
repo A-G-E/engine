@@ -17,6 +17,8 @@ export default class Program
         
         if(!this.gl.getProgramParameter(this._program, this.gl.LINK_STATUS))
         {
+            console.log(this.gl.getProgramInfoLog(this._program));
+            
             throw new Error('linking the shader-program has failed');
         }
     
@@ -92,8 +94,6 @@ export default class Program
                                 v
                             ];
                         }
-                        
-                        console.log(a);
     
                         self.gl[`uniform${t}${type.match(/[0-9]/)}fv`](...a);
                         

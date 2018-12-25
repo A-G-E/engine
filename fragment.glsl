@@ -1,9 +1,12 @@
 #version 300 es
+#define FRAG_COLOR_LOCATION 0
 
-precision mediump float;
+precision highp float;
 
 flat in vec3 fragColor;
 
+layout(location = FRAG_COLOR_LOCATION) out vec4 color;
+
 void main() {
-    gl_FragColor = vec4(fragColor, 1.0);
+    color = vec4(fragColor, 1.0);
 }

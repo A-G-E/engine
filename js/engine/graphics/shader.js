@@ -13,6 +13,8 @@ export default class Shader
     
         if(!this.gl.getShaderParameter(this._shader, this.gl.COMPILE_STATUS))
         {
+            console.log(this.gl.getShaderInfoLog(this._shader));
+            
             this.delete();
         
             throw new Error('creation of shader went wrong');

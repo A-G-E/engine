@@ -1,12 +1,13 @@
 #version 300 es
 #define POSITION_LOCATION 0
 #define NORMAL_LOCATION 1
+#define COLOR_LOCATION 2
 
 precision highp float;
 
 layout(location = POSITION_LOCATION) in vec3 vertex;
 layout(location = NORMAL_LOCATION) in vec3 normal;
-in vec3 color;
+layout(location = COLOR_LOCATION) in vec3 color;
 
 uniform mat4 world;
 uniform mat4 view;
