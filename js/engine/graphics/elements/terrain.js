@@ -18,8 +18,9 @@ export default class Terrain
         Promise.all([
             load('vertex.glsl'),
             load('fragment.glsl'),
-        ]).then(([v, f]) =>
-        {
+        ]).then(([v, f]) => {
+            console.log('terrain loaded');
+            
             this.program = new Program(
                 renderer,
                 new Vertex(renderer, v),

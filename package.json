@@ -1,0 +1,31 @@
+{
+    "name": "@cpbs/age",
+    "description": "A.G.E.",
+    "version": "0.0.1",
+    "main": "index.html",
+    "scripts": {
+        "release": "npm-github-release"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/chris-kruining/A.G.E"
+    },
+    "keywords": [],
+    "author": "Chris Kruining",
+    "license": "BSD",
+    "bugs": {
+        "url": "https://github.com/chris-kruining/A.G.E/issues"
+    },
+    "homepage": "https://github.com/chris-kruining/A.G.E",
+    "publishConfig": {
+        "access": "public"
+    },
+    "dependencies": {
+        "@fyn-software": "^0.0.1",
+        "@fyn-software/component": "0.0.2",
+        "@fyn-software/suite": "0.0.2"
+    },
+    "devDependencies": {
+        "npm-github-release": "0.9.0"
+    }
+}

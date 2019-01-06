@@ -1,0 +1,126 @@
+<link rel="stylesheet" type="text/css" href="http://fyn-software.cpb/suite/css/style.css">
+
+<style>
+    :host {
+        display: grid;
+        grid: auto 1fr / 1fr;
+    }
+
+    :host > toolbar {
+        display: grid;
+        grid-auto-flow: column;
+        grid-gap: 1em;
+        justify-content: start;
+        z-index: 2;
+        padding: .5em;
+    }
+
+    :host fyn-common-layout-list {
+        align-content: start;
+        padding: 1em;
+    }
+
+    :host properties {
+        display: grid;
+        grid-gap: 1em;
+        align-content: start;
+    }
+</style>
+
+<toolbar>
+    <fyn-common-form-button icons="plus" multi>
+        <span slot="options">t_page</span>
+
+        <span slot="options">t_widget</span>
+    </fyn-common-form-button>
+
+    <fyn-common-form-group combined>
+        <fyn-common-form-button icons="save"></fyn-common-form-button>
+
+        <fyn-common-form-button icons="folder-open"></fyn-common-form-button>
+    </fyn-common-form-group>
+
+    <fyn-common-form-group combined>
+        <fyn-common-form-button icons="list-ul"></fyn-common-form-button>
+
+        <fyn-common-form-button icons="list-ol"></fyn-common-form-button>
+    </fyn-common-form-group>
+
+    <fyn-common-form-group combined>
+        <fyn-common-form-button icons="image"></fyn-common-form-button>
+
+        <fyn-common-form-button icons="link"></fyn-common-form-button>
+    </fyn-common-form-group>
+
+    <fyn-common-form-dropdown options="[ 'mobile-alt', 'tablet-alt', 'desktop' ]">
+        <fyn-common-graphics-icon slot="placeholder" icons="eye"></fyn-common-graphics-icon>
+
+        <fyn-common-graphics-icon icons="{{ option.value }}"></fyn-common-graphics-icon>
+    </fyn-common-form-dropdown>
+</toolbar>
+
+<fyn-common-layout-docks layout="{{ layout }}">
+    <fyn-common-layout-list slot="1" tab-title="t_pages">
+        <span>home</span>
+
+        <span>shop</span>
+
+        <span>contact</span>
+    </fyn-common-layout-list>
+
+    <cpb-voyage slot="2" tab-title="scene">
+    </cpb-voyage>
+
+    <span slot="3" tab-title="shop"></span>
+
+    <span slot="4" tab-title="contact"></span>
+
+    <properties slot="5" tab-title="t_properties">
+        <fyn-common-layout-collapsable title="basic properties">
+            <fyn-common-form-input label="Name"></fyn-common-form-input>
+
+            <fyn-common-form-dropdown label="Type" options="[ 'this', 'is', 'an', 'option' ]" filterable></fyn-common-form-dropdown>
+
+            <fyn-common-form-checkbox label="this is a checkbox"></fyn-common-form-checkbox>
+
+            <fyn-common-form-checkbox label="this is a toggle" toggle></fyn-common-form-checkbox>
+
+            <fyn-common-form-slider label="this is a slider" show-percentage show-value step="10"></fyn-common-form-slider>
+
+            <fyn-common-form-color label="this is a color picker"></fyn-common-form-color>
+
+            <fyn-common-form-group combined separators label="this is a combined group">
+                <fyn-common-form-input
+                    pattern="(?<h>\d{1,3}),\s*(?<s>\d{1,3})%,\s*(?<l>\d{1,3})%,\s*(?<a>\d{1}(?:\.\d{1})?)"
+                ></fyn-common-form-input>
+
+                <fyn-common-form-dropdown options="[ 'hsla', 'rgba', 'hex' ]"></fyn-common-form-dropdown>
+            </fyn-common-form-group>
+        </fyn-common-layout-collapsable>
+
+        <fyn-common-layout-collapsable title="placement" closed>
+            placement controls
+        </fyn-common-layout-collapsable>
+
+        <fyn-common-layout-collapsable title="text properties">
+            <fyn-common-form-font
+                key="AIzaSyDkWvoau_q6a8-kVHl9KsTNuwqUyLz7ggg"
+                label="this is a font selector"
+            ></fyn-common-form-font>
+
+            <fyn-common-form-group combined start>
+                <fyn-common-form-button icons="align-left"></fyn-common-form-button>
+
+                <fyn-common-form-button icons="align-center"></fyn-common-form-button>
+
+                <fyn-common-form-button icons="align-justify"></fyn-common-form-button>
+
+                <fyn-common-form-button icons="align-right"></fyn-common-form-button>
+            </fyn-common-form-group>
+        </fyn-common-layout-collapsable>
+    </properties>
+
+    <span slot="6" tab-title="t_widgets">Widget list panel</span>
+
+    <span slot="7" tab-title="t_performance">Performance panel</span>
+</fyn-common-layout-docks>
