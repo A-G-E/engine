@@ -24,12 +24,18 @@ export default class Renderer
         this._program = null;
         this._playState = Renderer.stopped;
         this._stack = [];
+        
+        const observer = new ResizeObserver(([e]) => {
+            this._canvas.width = e.contentRect.width;
+            this._canvas.height = e.contentRect.height;
+        });
+        
+        observer.observe(this._owner);
     }
 
     play()
     {
         this._playState = Renderer.playing;
-        this._canvas.style.zIndex = 100;
         this.loop();
     }
 
@@ -46,7 +52,6 @@ export default class Renderer
 
     loop()
     {
-        this.resize();
         this.clear();
 
         for(let item of this._stack)
@@ -63,19 +68,6 @@ export default class Renderer
     clear()
     {
         this._context.clear(this._context.COLOR_BUFFER_BIT | this._context.DEPTH_BUFFER_BIT);
-    }
-
-    resize()
-    {
-        if(
-            this._canvas.width !== this._owner.clientWidth ||
-            this._canvas.height !== this._owner.clientHeight
-        ){
-            this._canvas.width = this._owner.clientWidth;
-            this._canvas.height = this._owner.clientHeight;
-
-            this._context.viewport(0, 0, this._canvas.width, this._canvas.height);
-        }
     }
 
     add(element)
