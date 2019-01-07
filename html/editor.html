@@ -60,20 +60,20 @@
 </toolbar>
 
 <fyn-common-layout-docks layout="{{ layout }}">
-    <fyn-common-layout-list slot="1" tab-title="t_pages">
-        <span>home</span>
+    <fyn-common-layout-list slot="1" tab-title="t_prefabs">
+        <span>some scene</span>
 
-        <span>shop</span>
+        <span>a script</span>
 
-        <span>contact</span>
+        <span>some model</span>
     </fyn-common-layout-list>
 
     <cpb-voyage slot="2" tab-title="scene">
     </cpb-voyage>
 
-    <span slot="3" tab-title="shop"></span>
+    <span slot="3" tab-title="some other tab"></span>
 
-    <span slot="4" tab-title="contact"></span>
+    <span slot="4" tab-title="tab"></span>
 
     <properties slot="5" tab-title="t_properties">
         <fyn-common-layout-collapsable title="basic properties">
@@ -122,5 +122,7 @@
 
     <span slot="6" tab-title="t_widgets">Widget list panel</span>
 
-    <span slot="7" tab-title="t_performance">Performance panel</span>
+    <span slot="7" tab-title="t_performance">
+        <fyn-common-graphics-chart></fyn-common-graphics-chart>
+    </span>
 </fyn-common-layout-docks>
