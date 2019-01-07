@@ -12,11 +12,11 @@ export default class Renderer
         canvas.style.top = 0;
     
         const context = canvas.getContext('webgl2');
-        context.clearColor(1, 0, 1, 1);
+        context.clearColor(.1, 0, .1, 1);
         context.enable(context.DEPTH_TEST);
-        context.enable(context.CULL_FACE);
-        context.frontFace(context.CCW);
-        context.cullFace(context.BACK);
+        // context.enable(context.CULL_FACE);
+        context.frontFace(context.CW);
+        // context.cullFace(context.BACK);
     
         this._owner = owner;
         this._canvas = canvas;

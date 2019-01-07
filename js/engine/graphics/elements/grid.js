@@ -14,35 +14,28 @@ export default class Grid
         let load = p => fetch(p, {credentials: 'same-origin'}).then(r => r.text());
         
         const v = `#version 300 es
-            #define POSITION_LOCATION 0
             
-            precision highp float;
+            precision mediump float;
             
-            layout(location = POSITION_LOCATION) in vec3 vertex;
+            in vec3 vertex;
             
             uniform mat4 world;
             uniform mat4 view;
             uniform mat4 projection;
             
-            // out vec3 fragColor;
-            
             void main() {
                 // gl_Position = projection * view * world * vec4(vertex, 1.0);
                 gl_Position = vec4(vertex, 1.0);
-                // fragColor = vec3(0.2, 0.2, 0.2);
             }
         `;
         const f = `#version 300 es
-            #define FRAG_COLOR_LOCATION 0
             
-            precision highp float;
+            precision mediump float;
             
-            // in vec3 fragColor;
-            
-            layout(location = FRAG_COLOR_LOCATION) out vec4 color;
+            out vec4 color;
             
             void main() {
-                color = vec4(0.2, 0.2, 0.2, 1.0);
+                color = vec4(0, 1, 0, 1.0);
             }
         `;
     
@@ -53,22 +46,17 @@ export default class Grid
         );
     
         this.buffer = [];
-        // this.indices = [];
     
-        this.buffer.push(0, 1, 0);
-        this.buffer.push(0, -1, 0);
+        this.buffer.push(0, 0, 0);
+        this.buffer.push(0, .5, 0);
+        this.buffer.push(.7, 0, 0);
     
         let bv = new Buffer(renderer, [
             [ this.program['vertex'], 3 ],
         ]);
         bv.data = new Float32Array(this.buffer);
     
-        // let bi = new Buffer(renderer, [], renderer.gl.ELEMENT_ARRAY_BUFFER);
-        // bi.data = new Uint16Array(this.indices);
-    
-        let world = Matrix4.identity
-        // .rotate(60, new Vector3(1, 0, 0))
-        // .translate(new Vector3(-10, 0, -10));
+        let world = Matrix4.identity;
     
         this.program.world = world.points;
         this.program.view = view.points;
@@ -77,7 +65,7 @@ export default class Grid
 
     render(renderer)
     {
-        renderer.gl.drawArrays(renderer.gl.LINES, 0, 2);
+        renderer.gl.drawArrays(renderer.gl.TRIANGLES, 0, 3);
         // renderer.gl.drawElements(renderer.gl.LINES, this.indices.length, renderer.gl.UNSIGNED_SHORT, 0);
     }
 }
