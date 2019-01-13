@@ -55,7 +55,7 @@ const config = new Proxy(Config, {
         throw new Error(`${key} is not a registered resource`);
     },
 
-    construct: (c, [key, conf]) =>
+    construct: (c, [ key, conf ]) =>
     {
         localInstance.registration[key] = conf;
 
@@ -63,14 +63,10 @@ const config = new Proxy(Config, {
     },
 
     has: (c, key) =>
-    {
-        return localInstance.registration.hasOwnProperty(key);
-    },
+        localInstance.registration.hasOwnProperty(key),
 
     apply: (c, t, args) =>
-    {
-        return localInstance.load(args[0] || '');
-    }
+        localInstance.load(args[0] || ''),
 });
 
 export default config;

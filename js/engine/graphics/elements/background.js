@@ -8,13 +8,14 @@ export default class Background extends Texture
     constructor(renderer, key)
     {
         super(renderer, key);
-        
+
         this._blinkInterval = null;
     }
 
     load()
     {
-        return super.load().then(img => {
+        return super.load().then(img =>
+        {
             this._srcSize = new Vector2(img.width, img.height);
         });
     }
@@ -25,10 +26,11 @@ export default class Background extends Texture
 
         return super.render(i);
     }
-    
+
     blink(speed = 300)
     {
-        this._blinkInterval = setInterval(() => {
+        this._blinkInterval = setInterval(() =>
+        {
             this.filterMask.z = this.filterMask.z === 1 ? 0 : 1;
         }, speed);
     }

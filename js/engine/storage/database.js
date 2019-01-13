@@ -12,9 +12,10 @@ export default class Database
             name: name,
             connection: null,
             context: null,
-            _stores: {}
+            _stores: {},
         }, {
-            get: (container, property) => {
+            get: (container, property) =>
+            {
                 if(prototype.hasOwnProperty(property))
                 {
                     return prototype[property];
@@ -27,8 +28,8 @@ export default class Database
 
                 return container._stores[property];
             },
-            set: (container, property, value) => {
-
+            set: (container, property, value) =>
+            {
                 if(container.hasOwnProperty(property))
                 {
                     container[property] = value;
@@ -46,13 +47,13 @@ export default class Database
                 }
 
                 return true;
-            }
+            },
         });
     }
 
     stores(stores)
     {
-        for(let [name, data] of Object.entries(stores))
+        for(let [ name, data ] of Object.entries(stores))
         {
             this[name] = data;
         }
@@ -62,14 +63,17 @@ export default class Database
 
     open(version = undefined)
     {
-        return new Promise((resolve, revoke) => {
+        return new Promise((resolve, revoke) =>
+        {
             this.connection = this.driver.open(this.name, version);
 
-            this.connection.onerror = (e) => {
+            this.connection.onerror = e =>
+            {
                 revoke(e);
             };
 
-            this.connection.onupgradeneeded = () => {
+            this.connection.onupgradeneeded = () =>
+            {
                 this.context = this.connection.result;
 
                 for(let store of Object.values(this._stores))
@@ -78,7 +82,8 @@ export default class Database
                 }
             };
 
-            this.connection.onsuccess = () => {
+            this.connection.onsuccess = () =>
+            {
                 this.context = this.connection.result;
 
                 return resolve(this);
@@ -88,24 +93,29 @@ export default class Database
 
     transaction(store)
     {
-        return new Promise((resolve, revoke) => {
+        return new Promise((resolve, revoke) =>
+        {
             let transaction = this.context.transaction(store, 'readwrite');
 
             resolve(transaction.objectStore(store));
 
-            transaction.oncomplete = () => {
+            transaction.oncomplete = () =>
+            {
                 this.context.close();
             };
-        })
+        });
     }
 
     get(name, query)
     {
-        return new Promise((resolve, revoke) => {
-            this.transaction(name).then(table => {
+        return new Promise((resolve, revoke) =>
+        {
+            this.transaction(name).then(table =>
+            {
                 let key = table.get(query);
 
-                key.onsuccess = () => {
+                key.onsuccess = () =>
+                {
                     key.result
                         ? resolve(key.result)
                         : revoke({
@@ -115,7 +125,8 @@ export default class Database
                         });
                 };
 
-                key.onerror = (e) => {
+                key.onerror = e =>
+                {
                     revoke(e);
                 };
             });
@@ -125,12 +136,15 @@ export default class Database
     static get(name)
     {
         let parts = name.split('.');
-        return (new Database(parts.shift())).open().then(db => db.get(...parts))
+
+        return (new Database(parts.shift())).open()
+            .then(db => db.get(...parts));
     }
 
     put(name, ...rows)
     {
-        return this.transaction(name).then(table => {
+        return this.transaction(name).then(table =>
+        {
             for(let row of rows)
             {
                 table.put(row);
@@ -141,11 +155,15 @@ export default class Database
     static put(name, ...rows)
     {
         let parts = name.split('.');
-        return (new Database(parts[0])).open().then(db => db.put(parts[1], ...rows)).then(() => rows);
+
+        return (new Database(parts[0])).open()
+            .then(db => db.put(parts[1], ...rows))
+            .then(() => rows);
     }
 
     static init(name, stores, version = undefined)
     {
-        return (new Database(name)).stores(stores).open(version);
+        return (new Database(name)).stores(stores)
+            .open(version);
     }
 }

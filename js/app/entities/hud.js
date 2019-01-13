@@ -28,7 +28,7 @@ export default class HUD extends Rasher.Entity
         {
             corners.push(new Calculus.Vector2(...this.sections[i].reduce(
                 (t, s) => [ Math.max(t[0], s[0].z), Math.max(t[1], s[0].w) ],
-                [0, 0]
+                [ 0, 0 ]
             )));
         }
 
@@ -66,7 +66,7 @@ export default class HUD extends Rasher.Entity
 
                 availableSpace = renderer[dir] - corners[(i - 1) / 2][prop] - corners[(i + 1) / 2 % 4][prop];
 
-                stretchables = section.filter(([i, e]) =>
+                stretchables = section.filter(([ i, e ]) =>
                 {
                     if(e[1] === false)
                     {
@@ -114,18 +114,22 @@ export default class HUD extends Rasher.Entity
                 {
                     case 1:
                         posX = corners[0].x + drawn;
+
                         break;
 
                     case 3:
                         posY = corners[1].y + drawn;
+
                         break;
 
                     case 5:
                         posX = corners[3].x + drawn;
+
                         break;
 
                     case 7:
                         posY = corners[0].y + drawn;
+
                         break;
                 }
 

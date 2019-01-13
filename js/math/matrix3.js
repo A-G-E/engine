@@ -34,42 +34,30 @@ export default class Matrix3
 
     scale(vector)
     {
-         return this.multiply(Matrix3.scaling(vector));
+        return this.multiply(Matrix3.scaling(vector));
     }
 
     get points()
     {
-         return this._points;
+        return this._points;
     }
 
     static projection(w, h)
     {
-        return new Matrix3([
-            2 / w, 0,      0,
-            0,     -2 / h, 0,
-            -1,    1,      1,
-        ]);
+        return new Matrix3([ 2 / w, 0,      0, 0,     -2 / h, 0, -1,    1,      1 ]);
     }
 
     static translation(vector)
     {
         let { x, y } = vector;
 
-        return new Matrix3([
-            1, 0, 0,
-            0, 1, 0,
-            x, y, 1,
-        ]);
+        return new Matrix3([ 1, 0, 0, 0, 1, 0, x, y, 1 ]);
     }
 
     static scaling(vector)
     {
         let { x, y } = vector;
 
-        return new Matrix4([
-            x, 0, 0,
-            0, y, 0,
-            0, 0, 1,
-        ]);
+        return new Matrix4([ x, 0, 0, 0, y, 0, 0, 0, 1 ]);
     }
 }

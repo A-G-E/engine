@@ -1,6 +1,7 @@
 'use strict';
 
-export default class Vector2 {
+export default class Vector2
+{
     constructor(x, y)
     {
         this._x = x;
@@ -17,6 +18,7 @@ export default class Vector2 {
         }
 
         let f = this.magnitude;
+
         return new Vector2(this.x / f, this.y / f);
     }
 
@@ -100,7 +102,7 @@ export default class Vector2 {
     {
         this._y = y;
     }
-    
+
     get points()
     {
         return [ this.x, this.y ];
@@ -130,22 +132,37 @@ export default class Vector2 {
     {
         let angle = this.angle % 360 + 180;
 
-        if (angle <= 22.5 || angle >= 337.5) {
+        if(angle <= 22.5 || angle >= 337.5)
+        {
             angle = 0;
-        } else if (angle <= 67.5) {
+        }
+        else if(angle <= 67.5)
+        {
             angle = 45;
-        } else if (angle <= 112.5) {
+        }
+        else if(angle <= 112.5)
+        {
             angle = 90;
-        } else if (angle <= 157.5) {
-            angle = 135
-        } else if (angle <= 202.5) {
-            angle = 180
-        } else if (angle <= 247.5) {
-            angle = 225
-        } else if (angle <= 292.5) {
-            angle = 270
-        } else if (angle < 337.5) {
-            angle = 315
+        }
+        else if(angle <= 157.5)
+        {
+            angle = 135;
+        }
+        else if(angle <= 202.5)
+        {
+            angle = 180;
+        }
+        else if(angle <= 247.5)
+        {
+            angle = 225;
+        }
+        else if(angle <= 292.5)
+        {
+            angle = 270;
+        }
+        else if(angle < 337.5)
+        {
+            angle = 315;
         }
 
         angle -= 180;

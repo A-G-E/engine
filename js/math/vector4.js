@@ -20,6 +20,7 @@ export default class Vector4
         }
 
         let f = this.magnitude;
+
         return new Vector3(this.x / f, this.y / f, this.z / f, this.w / f);
     }
 
@@ -106,17 +107,17 @@ export default class Vector4
     {
         this._w = w;
     }
-    
+
     get xy()
     {
         return new Vector2(this.x, this.y);
     }
-    
+
     get zw()
     {
         return new Vector2(this.z, this.w);
     }
-    
+
     get normalized()
     {
         return this.normalize();

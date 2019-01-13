@@ -21,10 +21,7 @@ export default class Texture extends RenderElement
         this.filter = new Calculus.Vector4(1, 1, 1, 1);
         this.filterMask = new Calculus.Vector4(0, 0, 0, 0);
         this._textureBuffer = new Buffer(renderer, 'texture');
-        this._textureBuffer.data = [
-            0, 0,   0, 1,   1, 0,
-            1, 0,   0, 1,   1, 1,
-        ];
+        this._textureBuffer.data = [ 0, 0,   0, 1,   1, 0, 1, 0,   0, 1,   1, 1 ];
 
         this.bind();
         this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, 1, 1, 0, this.gl.RGBA, this.gl.UNSIGNED_BYTE, new Uint8Array([ 0, 0, 255, 255 ]));
@@ -36,13 +33,15 @@ export default class Texture extends RenderElement
 
     load()
     {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve, reject) =>
+        {
             let img = new Image();
             img.onload = () => resolve(img);
             img.onerror = reject;
             img.src = this._url;
         })
-            .then(img => {
+            .then(img =>
+            {
                 this._imageSize = new Calculus.Vector2(img.width, img.height);
 
                 this.bind();
@@ -79,12 +78,12 @@ export default class Texture extends RenderElement
             .scale(new Calculus.Vector3(source.width / image.width, source.height / image.height, 1));
 
         this.gl.uniformMatrix4fv(uniform.texMatrix, false, texMatrix.points);
-        
+
         this.gl.uniform1i(uniform.texture, 0);
         this.gl.uniform1f(uniform.alpha, this.alpha);
-        this.gl.uniform4fv(uniform.filter, new Float32Array([...this.filter]));
-        this.gl.uniform4fv(uniform.filterMask, new Float32Array([...this.filterMask]));
-        
+        this.gl.uniform4fv(uniform.filter, new Float32Array([ ...this.filter ]));
+        this.gl.uniform4fv(uniform.filterMask, new Float32Array([ ...this.filterMask ]));
+
         this.gl.drawArrays(this.gl.TRIANGLES, 0, 6);
     }
 

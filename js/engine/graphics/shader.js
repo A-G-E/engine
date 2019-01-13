@@ -7,16 +7,16 @@ export default class Shader
         this.gl = renderer.gl;
         this._src = src;
         this._shader = this.gl.createShader(type);
-    
+
         this.gl.shaderSource(this._shader, src);
         this.gl.compileShader(this._shader);
-    
+
         if(!this.gl.getShaderParameter(this._shader, this.gl.COMPILE_STATUS))
         {
             console.log(this.gl.getShaderInfoLog(this._shader));
-            
+
             this.delete();
-        
+
             throw new Error('creation of shader went wrong');
         }
     }

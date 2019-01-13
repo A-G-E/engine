@@ -28,15 +28,15 @@ export default class Player extends Rasher.Entity
 
             let frameBlender = () => Rasher.Animation.ease(f =>
             {
-                // console.log([ 1 - f, f ]);
+                // Console.log([ 1 - f, f ]);
                 //
-                // monster.alphas = [ 1 - f, f ];
+                // Monster.alphas = [ 1 - f, f ];
             }, {
                 duration: 300,
                 easing: 'linear',
             }).then(() =>
             {
-                // this.sprite._srcPosition.x = (this.frame + 1) * this.sprite._srcSize.x;
+                // This.sprite._srcPosition.x = (this.frame + 1) * this.sprite._srcSize.x;
                 this.frame = ++this.frame % 2;
 
                 frameBlender();
@@ -64,20 +64,24 @@ export default class Player extends Rasher.Entity
                 case 180:
                 case -180:
                     this._animationState.y = 2;
+
                     break;
 
                 case -45:
                 case -135:
                     this._animationState.y = 1;
+
                     break;
 
                 case 45:
                 case 135:
                     this._animationState.y = 3;
+
                     break;
 
                 case 90:
                     this._animationState.y = 4;
+
                     break;
 
                 case -90:
@@ -88,7 +92,8 @@ export default class Player extends Rasher.Entity
 
             if(this._animationLoop === null)
             {
-                this._animationLoop = setInterval(() => {
+                this._animationLoop = setInterval(() =>
+                {
                     this._animationState.x = this.frame + 1;
                     this.frame = ++this.frame % 2;
                 }, 150);

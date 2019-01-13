@@ -9,17 +9,17 @@ export default class Line
         this._a = a;
         this._b = b;
     }
-    
+
     get a()
     {
         return this._a;
     }
-    
+
     get b()
     {
         return this._b;
     }
-    
+
     get delta()
     {
         return this._b.add(this._a.multiply(-1));

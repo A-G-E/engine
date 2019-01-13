@@ -7,19 +7,18 @@ export default class Editor extends Fyn.Component
     {
         return {
             layout: {
-                mode: Docks.vertical,
-                sizes: [ 120, null, 300 ],
+                mode: Docks.horizontal,
+                sizes: [ null, 150 ],
                 children: [
-                    [ 1 ],
-                    [ 2, 3, 4 ],
                     {
-                        mode: Docks.horizontal,
+                        mode: Docks.vertical,
                         sizes: [ null, 300 ],
                         children: [
+                            [ 2, 3, 4 ],
                             [ 5, 6 ],
-                            [ 7 ],
                         ],
-                    }
+                    },
+                    [ 1, 7 ],
                 ],
             },
         };

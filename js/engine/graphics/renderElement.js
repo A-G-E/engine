@@ -8,17 +8,17 @@ export default class RenderElement
 {
     constructor(renderer, position, size)
     {
-        if(!renderer instanceof Renderer)
+        if(!(renderer instanceof Renderer))
         {
             throw new Error('argument "renderer" is not an instance of the Renderer class');
         }
 
-        if(!position instanceof Calculus.Vector2)
+        if(!(position instanceof Calculus.Vector2))
         {
             throw new Error('argument "position" is not an instance of the Vector2 class');
         }
 
-        if(!size instanceof Calculus.Vector2)
+        if(!(size instanceof Calculus.Vector2))
         {
             throw new Error('argument "size" is not an instance of the Vector2 class');
         }
@@ -29,14 +29,7 @@ export default class RenderElement
         this._size = size;
 
         this._positionBuffer = new Buffer(renderer, 'position');
-        this._positionBuffer.data = [
-            0, 0,
-            0, 1,
-            1, 0,
-            1, 0,
-            0, 1,
-            1, 1,
-        ];
+        this._positionBuffer.data = [ 0, 0, 0, 1, 1, 0, 1, 0, 0, 1, 1, 1 ];
     }
 
     render()
@@ -63,7 +56,7 @@ export default class RenderElement
                 this._position.y + this._position.w * this._renderer.height
             );
         }
-        
+
         return this._position;
     }
 
@@ -81,7 +74,7 @@ export default class RenderElement
     {
         this._size = size;
     }
-    
+
     set scalar(val)
     {
         this._scalar = val;

@@ -13,17 +13,17 @@ export default class Scene
         {
             throw new Error(this.__proto__.constructor.name + ' does not have a method `setup`');
         }
-        
+
         if(!this.__proto__.hasOwnProperty('loop'))
         {
             throw new Error(this.__proto__.constructor.name + ' does not have a method `loop`');
         }
-        
+
         if(!this.__proto__.constructor.hasOwnProperty('config'))
         {
             throw new Error(this.__proto__.constructor.name + ' does not have a getter `config`');
         }
-        
+
         this.state = Scene.stopped;
         this.renderer = new Renderer();
         this.loopInterval = null;
@@ -31,18 +31,19 @@ export default class Scene
 
         this._owner = game;
         this.variables = {};
-        this.options = Object.assign({
+        this.options = {
             resources: {},
-            input: {},
-        }, this.__proto__.constructor.config);
-        
+            input: {}, ...this.__proto__.constructor.config,
+        };
+
         this.input = new Input(this.options.input);
     }
 
     install()
     {
-        return Promise.all(Object.entries(this.options.resources).map(([k, v]) => new Resources(k, v)))
-            .then(() => {
+        return Promise.all(Object.entries(this.options.resources).map(([ k, v ]) => new Resources(k, v)))
+            .then(() =>
+            {
                 this.setup(this._owner);
 
                 return this;
@@ -52,7 +53,7 @@ export default class Scene
     add(element)
     {
         this.renderer.add(element);
-        
+
         return element.load().then(() => element);
     }
 
@@ -88,13 +89,15 @@ export default class Scene
     {
         this.state = Scene.stopped;
         this.onStop();
-        
+
         clearInterval(this.loopInterval);
         this.renderer.stop();
     }
-    
+
     onPlay(){}
+
     onPause(){}
+
     onStop(){}
 
     set owner(owner)

@@ -10,41 +10,41 @@ export default class Plane
         this.ac = ac;
         this._translation = translation;
     }
-    
+
     intersectsAt(line)
     {
         return line.a.add(line.delta.normalized.multiply(
             (this.normal.dotProduct(this._translation) - this.normal.dotProduct(line.a)) / this.normal.dotProduct(line.delta)
         ));
     }
-    
+
     get normal()
     {
         return this.ab.crossProduct(this.ac);
     }
-    
+
     get translation()
     {
         return this._translation;
     }
-    
+
     set translation(v3)
     {
         if(!(v3 instanceof Vector3))
         {
             throw new Error('translation must be a Vector 3 instance');
         }
-        
+
         this._translation = v3;
     }
-    
+
     static fromPoints(a, b, c)
     {
-        if(![a, b, c].every(p => p instanceof Vector3))
+        if(![ a, b, c ].every(p => p instanceof Vector3))
         {
             throw new Error('all 3 points must be a Vector 3 instance');
         }
-        
+
         return new Plane(b.add(a.multiply(-1)), c.add(a.multiply(-1)), a);
     }
 }

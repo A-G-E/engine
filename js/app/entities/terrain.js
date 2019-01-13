@@ -57,7 +57,7 @@ export default class Terrain extends Rasher.Entity
 
                 this.sprite = new Rasher.Sprite(this._renderer, key);
 
-                for(let [id, config] of Object.entries(tiles))
+                for(let [ id, config ] of Object.entries(tiles))
                 {
                     this._tiles[id] = new Tile(config);
                 }
@@ -79,15 +79,15 @@ export default class Terrain extends Rasher.Entity
             return;
         }
 
-        for(let [z, rows] of Object.entries(this._terrain))
+        for(let [ z, rows ] of Object.entries(this._terrain))
         {
             z = Number.parseInt(z);
 
-            for(let [y, columns] of  Object.entries(rows))
+            for(let [ y, columns ] of  Object.entries(rows))
             {
                 y = Number.parseInt(y);
 
-                for(let [x, stack] of  Object.entries(columns))
+                for(let [ x, stack ] of  Object.entries(columns))
                 {
                     x = Number.parseInt(x);
 
@@ -135,64 +135,64 @@ export default class Terrain extends Rasher.Entity
             let local = vector3.subtract(floored);
             let tile = this._terrain[floored.z][floored.y][floored.x];
             let zIsQueried = false;
-    
+
             if(tile !== undefined && this._tiles.hasOwnProperty(tile))
             {
                 let vertices = this._tiles[tile].vertices;
-        
+
                 for(let i = 0; i < vertices.length; i += 3)
                 {
                     let a = new Calculus.Vector3(...vertices[i + 0]);
                     let b = new Calculus.Vector3(...vertices[i + 1]);
                     let c = new Calculus.Vector3(...vertices[i + 2]);
-            
+
                     if(pointInVertex(floored, [ a, b, c ]))
                     {
                         let pos = Calculus.Plane.fromPoints(a, b, c).intersectsAt(new Calculus.Line(
                             new Calculus.Vector3(local.x, local.y, 0),
                             new Calculus.Vector3(local.x, local.y, 1)
                         ));
-                
-                        if([...pos].every(d => !Number.isNaN(d)))
+
+                        if([ ...pos ].every(d => !Number.isNaN(d)))
                         {
                             vector3.z = floored.z + pos.z;
-                            zIsQueried = true
+                            zIsQueried = true;
                         }
                     }
                 }
             }
-            
+
             let threshold = .25;
             let deltaZ = Math.abs(this._camPos.z - vector3.z);
             let i = (Math.round(delta.angle) + 360) % 360 / 45;
-    
-            if([0, 1, 7].includes(i) && (deltaZ > threshold || zIsQueried === false))
+
+            if([ 0, 1, 7 ].includes(i) && (deltaZ > threshold || zIsQueried === false))
             {
                 vector3.x = Math.max(Math.floor(this._camPos.x) + .001, vector3.x);
             }
-            else if([3, 4, 5].includes(i) && (deltaZ > threshold || zIsQueried === false))
+            else if([ 3, 4, 5 ].includes(i) && (deltaZ > threshold || zIsQueried === false))
             {
                 vector3.x = Math.min(Math.ceil(this._camPos.x) - .001, vector3.x);
             }
 
-            if([1, 2, 3].includes(i) && (deltaZ > threshold || zIsQueried === false))
+            if([ 1, 2, 3 ].includes(i) && (deltaZ > threshold || zIsQueried === false))
             {
                 vector3.y = Math.max(Math.floor(this._camPos.y) + .001, vector3.y);
             }
-            else if([5, 6, 7].includes(i) && (deltaZ > threshold || zIsQueried === false))
+            else if([ 5, 6, 7 ].includes(i) && (deltaZ > threshold || zIsQueried === false))
             {
                 vector3.y = Math.min(Math.ceil(this._camPos.y) - .001, vector3.y);
             }
-    
+
             this._camPos = vector3;
         }
     }
-    
+
     get camera()
     {
         return this._camPos;
     }
-    
+
     set camera(vector3)
     {
         this._camPos = vector3;

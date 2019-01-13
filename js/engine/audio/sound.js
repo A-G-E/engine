@@ -12,7 +12,7 @@ export default class Sound
             music: 1,
             effect: 1,
         });
-        
+
         this.audio = new Audio();
         this.audio.src = Resources[key];
         this.audio.autoplay = false;
@@ -20,27 +20,27 @@ export default class Sound
         this.audio.volume = Config.volumes.master * Config.volumes[type] * volume;
         this.playing = false;
     }
-    
+
     play()
     {
         this.audio.play();
         this.playing = true;
     }
-    
+
     pause()
     {
         this.audio.pause();
         this.playing = false;
     }
-    
+
     stop()
     {
         this.audio.pause();
         this.audio.currentTime = 0;
-        
+
         this.playing = false;
     }
-    
+
     toggle()
     {
         if(this.playing)

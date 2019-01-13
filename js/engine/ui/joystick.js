@@ -17,35 +17,39 @@ export default class Joystick
 
         if(window.mobile === true)
         {
-            window.addEventListener('pointerdown', e => {
+            window.addEventListener('pointerdown', e =>
+            {
                 if(
-                    this.pointerid === null &&
-                    e.x >= this.sprite.position.x &&
-                    e.x <= this.sprite.position.x + this.sprite.size.x &&
-                    e.y >= this.sprite.position.y &&
-                    e.y <= this.sprite.position.y + this.sprite.size.y
-                ){
+                    this.pointerid === null
+                    && e.x >= this.sprite.position.x
+                    && e.x <= this.sprite.position.x + this.sprite.size.x
+                    && e.y >= this.sprite.position.y
+                    && e.y <= this.sprite.position.y + this.sprite.size.y
+                )
+                {
                     this.pointerid = e.pointerId;
                     this.startPoint = new Calculus.Vector2(e.x, e.y);
                 }
             });
-            window.addEventListener('pointermove', e => {
+            window.addEventListener('pointermove', e =>
+            {
                 if(e.pointerId === this.pointerid)
                 {
                     this.delta = new Calculus.Vector2(this.startPoint.x - e.x, this.startPoint.y - e.y).multiply(-1);
                 }
             });
-            window.addEventListener('pointerup', e => {
+            window.addEventListener('pointerup', e =>
+            {
                 if(e.pointerId === this.pointerid)
                 {
                     this.pointerid = null;
-        
+
                     let delta = this.delta.clone;
-        
+
                     Animation.ease(f => this.delta = delta.multiply(1 - f), {
-                            duration: 100,
-                            easing: 'easeOut'
-                        })
+                        duration: 100,
+                        easing: 'easeOut',
+                    })
                         .then(() => this.delta = new Calculus.Vector2(0));
                 }
             });
@@ -67,7 +71,7 @@ export default class Joystick
         {
             return;
         }
-    
+
         this.sprite.position = new Calculus.Vector2(24, this.renderer.height - 152);
         this.sprite._srcPosition.x = 0;
         this.sprite.render();

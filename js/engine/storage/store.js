@@ -6,10 +6,10 @@ export default class Store
     {
         // NOTE(Chris Kruining)
         // If the indexedDb doesn't get a
-        // keyPath(translated to primary
-        // index in this class) it is
-        // impossible to insert rows into
-        // that table
+        // KeyPath(translated to primary
+        // Index in this class) it is
+        // Impossible to insert rows into
+        // That table
         if(data.indexes === undefined || data.indexes.primary === undefined)
         {
             throw new Error('No primary key given');
@@ -20,9 +20,10 @@ export default class Store
             name: name,
             database: database,
             fields: data.fields,
-            indexes: data.indexes
+            indexes: data.indexes,
         }, {
-            get: (container, property) => {
+            get: (container, property) =>
+            {
                 if(prototype.hasOwnProperty(property))
                 {
                     return prototype[property];
@@ -35,7 +36,8 @@ export default class Store
 
                 return this.database.get(this.name, property);
             },
-            set: (container, property, value) => {
+            set: (container, property, value) =>
+            {
                 if(container.hasOwnProperty(property))
                 {
                     container[property] = value;
@@ -45,9 +47,9 @@ export default class Store
 
                 // TODO(Chris Kruuining)
                 // Start database transaction to
-                // actually store the value
+                // Actually store the value
 
-                // container.fields[property] = value;
+                // Container.fields[property] = value;
 
                 return true;
             },

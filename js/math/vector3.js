@@ -24,6 +24,7 @@ export default class Vector3
         }
 
         let f = this.magnitude;
+
         return new Vector3(this.x / f, this.y / f, this.z / f);
     }
 
@@ -140,7 +141,8 @@ export default class Vector3
 
     [Symbol.toPrimitive]()
     {
-        return Object.entries({X: this.x, Y: this.y, Z: this.z}).map(d => d.join(': ')).join(', ');
+        return Object.entries({ X: this.x, Y: this.y, Z: this.z }).map(d => d.join(': '))
+            .join(', ');
     }
 
     *[Symbol.iterator]()
@@ -187,12 +189,12 @@ export default class Vector3
 
     get points()
     {
-        return [this.x, this.y, this.z];
+        return [ this.x, this.y, this.z ];
     }
 
     get values()
     {
-        return [this.x, this.y, this.z];
+        return [ this.x, this.y, this.z ];
     }
 
     get magnitude()
@@ -209,7 +211,7 @@ export default class Vector3
     {
         return new Vector3(this.x, this.y, this.z);
     }
-    
+
     get normalized()
     {
         return this.normalize();
