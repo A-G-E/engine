@@ -50,6 +50,24 @@ export default class Program
             )
             .reduce((t, a) => [ ...t, ...a ], []);
 
+        // let ubos = shaders
+        //     .filter(s => s instanceof Vertex)
+        //     .map(s => s.src.match(/uniform\s+([a-z][a-z0-9]+)\s*{\s*([^}]+)\s*};/g))
+        //     .filter(l => l !== null)
+        //     .reduce((t, a) => [ ...t, ...a ], [])
+        //     .map(m => {
+        //         let match = m.match(/uniform\s+([a-z][a-z0-9]+)\s*{\s*([^}]+)\s*};/);
+        //
+        //         return {
+        //             name: match[1],
+        //             items: match[2]
+        //                 .split('\n')
+        //                 .map(l => l.trim().match(/^([a-z][a-z0-9]+)\s+([a-zA-Z0-9_]+);$/))
+        //                 .filter(l => l !== null)
+        //                 .map(l => l.slice(1))
+        //         };
+        //     });
+
         for(let [ , modifier, type, name ] of matches)
         {
             let f;

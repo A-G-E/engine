@@ -10,6 +10,11 @@ const v = `#version 300 es
     uniform mat4 view;
     uniform mat4 projection;
     
+    // uniform camera{
+    //     mat4 v;
+    //     mat4 p;
+    // };
+    
     void main(void) {           
         gl_Position = projection * view * world * vec4(vertex, 1.0);
     }
