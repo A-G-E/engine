@@ -1,3 +1,4 @@
+import Renderable from './renderable.js';
 import { Matrix4 } from '../../math/exports.js';
 import * as Calculus from '../../math/exports.js';
 
@@ -75,7 +76,9 @@ export default class Renderer extends EventTarget
 
         for(let item of this._stack)
         {
+            item.preRender(this);
             item.render(this);
+            item.postRender(this);
         }
 
         if(this._playState === Renderer.playing)
@@ -92,12 +95,12 @@ export default class Renderer extends EventTarget
 
     add(element)
     {
-        // If(!element instanceof RenderElement)
-        // {
-        //     Throw new Error('Renderer.add expected an RenderElement, got something else');
-        // }
+        if(!element instanceof Renderable)
+        {
+            throw new Error('Renderer.add expected an Renderable, got something else');
+        }
 
-        this._stack.push(new element(this));
+        this._stack.push(element);
     }
 
     get canvas()

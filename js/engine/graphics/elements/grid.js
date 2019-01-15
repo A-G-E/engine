@@ -1,10 +1,15 @@
-import Buffer from '../buffer.js';
+import Renderable from '../renderable.js';
+import Vao from '../vao.js';
 import Program from '../program.js';
 import Vertex from '../shaders/vertex.js';
 import Fragment from '../shaders/fragment.js';
 import { Matrix4, Vector3 } from '../../../math/exports.js';
 
-const v = `#version 300 es
+export default class Grid extends Renderable
+{
+    constructor(renderer)
+    {
+        const v = `#version 300 es
         
             precision mediump float;
             
@@ -23,7 +28,8 @@ const v = `#version 300 es
                 gl_Position = projection * view * world * vec4(vertex, 1.0);
             }
         `;
-const f = `#version 300 es
+
+        const f = `#version 300 es
         
             precision mediump float;
             
@@ -36,15 +42,7 @@ const f = `#version 300 es
             }
         `;
 
-export default class Grid
-{
-    constructor(renderer)
-    {
-        this.program = new Program(
-            renderer,
-            new Vertex(renderer, v),
-            new Fragment(renderer, f)
-        );
+        super(renderer, v, f);
 
         let buffer = [];
 
@@ -70,15 +68,7 @@ export default class Grid
             0, 0.007, t, 0, 1, 0,      0, 0.007, -t, 0, 1, 0, // +z -> -z
         );
 
-        this.buffer = new Buffer(
-            renderer,
-            [
-                [ this.program.vertex, 3 ],
-                [ this.program.color, 3 ]
-            ],
-            buffer
-        );
-
+        this.vao.vertices = buffer;
         this.program.world = Matrix4.identity.points;
         this.program.projection = renderer.projection.points;
 
@@ -98,6 +88,6 @@ export default class Grid
             new Vector3(0, 1, 0)
         ).points;
 
-        renderer.gl.drawArrays(renderer.gl.LINES, 0, this.buffer.length);
+        this.vao.draw();
     }
 }

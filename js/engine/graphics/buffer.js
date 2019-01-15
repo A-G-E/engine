@@ -13,11 +13,16 @@ export default class Buffer
         this.data = data;
     }
 
+    bind()
+    {
+        this.gl.bindBuffer(this._type, this._buffer);
+
+        return this;
+    }
+
     set attributes(attributes)
     {
         this._attributes = attributes;
-
-        this.gl.bindBuffer(this._type, this._buffer);
 
         attributes = attributes.filter(i => i[0] !== undefined);
 
@@ -26,11 +31,14 @@ export default class Buffer
             return;
         }
 
+        this.gl.bindBuffer(this._type, this._buffer);
+
         let offset = 0;
         let total = attributes.map(a => a[1]).sum;
 
         for(let [ key, size ] of attributes)
         {
+            this.gl.enableVertexAttribArray(key);
             this.gl.vertexAttribPointer(
                 key,
                 size,
@@ -39,19 +47,15 @@ export default class Buffer
                 total * Float32Array.BYTES_PER_ELEMENT,
                 offset * Float32Array.BYTES_PER_ELEMENT
             );
-            this.gl.enableVertexAttribArray(key);
 
             offset += size;
         }
-
-        // this.gl.bindBuffer(this._type, null);
     }
 
     set data(data)
     {
         this.gl.bindBuffer(this._type, this._buffer);
-        this.gl.bufferData(this._type, new Float32Array(data), this.gl.STATIC_DRAW);
-        // this.gl.bindBuffer(this._type, null);
+        this.gl.bufferData(this._type, data, this.gl.STATIC_DRAW);
 
         this._length = data.length;
     }
@@ -60,11 +64,6 @@ export default class Buffer
     {
         let attributes = this._attributes.filter(i => i[0] !== undefined);
 
-        if(attributes.length === 0)
-        {
-            return 0;
-        }
-
-        return this._length / attributes.map(a => a[1]).sum;
+        return this._length / Math.max(1, attributes.map(a => a[1]).sum);
     }
 }

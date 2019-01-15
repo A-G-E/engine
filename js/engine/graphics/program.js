@@ -1,6 +1,20 @@
 import Shader from './shader.js';
 import Vertex from './shaders/vertex.js';
 
+const typeSize = {
+    bool: 1,
+    int: 1,
+    uint: 1,
+    float: 1,
+    double: 1,
+    vec2: 2,
+    vec3: 3,
+    vec4: 4,
+    mat2: 4,
+    mat3: 9,
+    mat4: 16,
+};
+
 export default class Program
 {
     constructor(renderer, ...shaders)
@@ -34,7 +48,7 @@ export default class Program
                 .map(l => l.trim().match(/^(in|uniform)\s+([a-z][a-z0-9]+)\s+([a-zA-Z0-9_]+);$/))
                 .filter(l => l !== null)
             )
-            .reduce((t, a) => [ ...t, ...a ]);
+            .reduce((t, a) => [ ...t, ...a ], []);
 
         for(let [ , modifier, type, name ] of matches)
         {
@@ -53,7 +67,7 @@ export default class Program
                     break;
             }
 
-            this._variables[name] = [ modifier, type, this[`get${f}Location`](name) ];
+            this._variables[name] = [ f, type, this[`get${f}Location`](name), typeSize[type] ];
         }
 
         const self = this;
@@ -72,16 +86,16 @@ export default class Program
             },
             set: (c, p, v) =>
             {
-                if(!self._variables.hasOwnProperty(p))
-                {
-                    return false;
-                }
-
                 if(p in self)
                 {
                     self[p] = v;
 
                     return true;
+                }
+
+                if(!self._variables.hasOwnProperty(p))
+                {
+                    return false;
                 }
 
                 let [ modifier, type, location ] = self._variables[p];
@@ -90,7 +104,7 @@ export default class Program
 
                 switch(modifier)
                 {
-                    case 'uniform':
+                    case 'Uniform':
                         let t; let a;
 
                         if(type.startsWith('mat'))
@@ -131,6 +145,11 @@ export default class Program
         this.gl.attachShader(this._program, shader.shader);
     }
 
+    use()
+    {
+        this.gl.useProgram(this.program);
+    }
+
     getAttributeLocation(loc)
     {
         return this.gl.getAttribLocation(this._program, loc);
@@ -144,5 +163,15 @@ export default class Program
     get program()
     {
         return this._program;
+    }
+
+    get attributes()
+    {
+        return Object.values(this._variables).filter(v => v[0] === 'Attribute').map(v => v.slice(2));
+    }
+
+    get uniforms()
+    {
+        return Object.values(this._variables).filter(v => v[0] === 'Uniform').map(v => v.slice(2));
     }
 }
