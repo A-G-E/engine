@@ -50,7 +50,7 @@ export default class Buffer
     set data(data)
     {
         this.gl.bindBuffer(this._type, this._buffer);
-        this.gl.bufferData(this._type, new Float32Array(data), this.gl.STATIC_DRAW);
+        this.gl.bufferData(this._type, data, this.gl.STATIC_DRAW);
         // this.gl.bindBuffer(this._type, null);
 
         this._length = data.length;
