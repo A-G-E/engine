@@ -5,6 +5,7 @@ const v = `#version 300 es
     precision mediump float;
     
     in vec3 vertex;
+    in vec3 normal;
     
     uniform mat4 world;
     
@@ -13,17 +14,34 @@ const v = `#version 300 es
         mat4 projection;
     };
     
+    uniform light{
+        vec3 lightDirection;
+        vec3 lightColour;
+        vec2 lightBias;
+    };
+    
+    flat out vec3 v_color;
+    
+    vec3 calculateLighting(){
+        float brightness = max(dot(-lightDirection, normal), 0.0);
+        return (lightColour * lightBias.x) + (brightness * lightColour * lightBias.y);
+    }
+    
     void main(void) {           
+        v_color = calculateLighting();
+        
         gl_Position = projection * view * world * vec4(vertex, 1.0);
     }
 `;
 const f = `#version 300 es
     precision mediump float;
+    
+    flat in vec3 v_color;
                 
     out vec4 color;
     
     void main(void) {
-        color = vec4(.8, .5, .8, 1.0);
+        color = vec4(v_color, 1.0) * vec4(.8, .5, .8, 1.0);
     }
 `;
 
@@ -61,12 +79,12 @@ export default class Bone extends Renderable
         // ], indices.map(i => i.points));
 
         super(renderer, v, f, [
-               0,  0,    0,
-             .25, .5,  .25,
-            -.25, .5,  .25,
-            -.25, .5, -.25,
-             .25, .5, -.25,
-               0,  2,    0,
+               0,  0,    0,     0, -1,  0,
+             .25, .5,  .25,     0,  0, -1,
+            -.25, .5,  .25,     0, -1,  0,
+            -.25, .5, -.25,     0,  1,  0,
+             .25, .5, -.25,     0,  0,  1,
+               0,  2,    0,     0,  1,  0,
         ], [
             0, 1, 2,
             0, 2, 3,

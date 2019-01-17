@@ -1,7 +1,7 @@
 'use strict';
 
 import * as Fyn from 'http://fyn-software.cpb/component/fyn.js';
-import { Matrix4, Vector3 } from '../math/exports.js';
+import { Matrix4, Vector3, Vector2 } from '../math/exports.js';
 import Renderer from './graphics/renderer.js';
 import Ubo from './graphics/ubo.js';
 import Grid from './graphics/elements/grid.js';
@@ -19,6 +19,12 @@ export default class Game extends Fyn.Component
                 new Vector3(0, 1, 0)
             ),
             projection: renderer.projection,
+        });
+
+        const light = new Ubo('light', renderer, {
+            lightDirection: new Vector3(.3, -1, .5),
+            lightColour: new Vector3(1, .8, .8),
+            lightBias: new Vector2(.3, .8),
         });
 
         renderer.on({ resized: () => camera.projection = renderer.projection });
