@@ -19,8 +19,11 @@ export default class Grid extends Renderable
             out vec3 f_color;
             
             uniform mat4 world;
-            uniform mat4 view;
-            uniform mat4 projection;
+    
+            uniform camera{
+                mat4 view;
+                mat4 projection;
+            };
             
             void main(void) {
                 f_color = color;
@@ -70,24 +73,10 @@ export default class Grid extends Renderable
 
         this.vao.vertices = buffer;
         this.program.world = Matrix4.identity.points;
-        this.program.projection = renderer.projection.points;
-
-        renderer.on({
-            resized: () => this.program.projection = renderer.projection.points,
-        });
     }
 
     render(renderer)
     {
-        const r = performance.now() * .00025;
-        const d = 5;
-
-        this.program.view = Matrix4.lookAt(
-            new Vector3(d * Math.cos(r), 4, d * Math.sin(r)),
-            new Vector3(0, 0, 0),
-            new Vector3(0, 1, 0)
-        ).points;
-
         this.vao.draw();
     }
 }

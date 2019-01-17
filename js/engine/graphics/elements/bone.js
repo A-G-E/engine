@@ -7,13 +7,11 @@ const v = `#version 300 es
     in vec3 vertex;
     
     uniform mat4 world;
-    uniform mat4 view;
-    uniform mat4 projection;
     
-    // uniform camera{
-    //     mat4 v;
-    //     mat4 p;
-    // };
+    uniform camera{
+        mat4 view;
+        mat4 projection;
+    };
     
     void main(void) {           
         gl_Position = projection * view * world * vec4(vertex, 1.0);
@@ -33,6 +31,35 @@ export default class Bone extends Renderable
 {
     constructor(renderer)
     {
+        // const vertices = [
+        //     new Vector3(0, 0, 0),
+        //     new Vector3(.25, .5, .25),
+        //     new Vector3(.25, .5, .25),
+        //     new Vector3(-.25, .5, -.25),
+        //     new Vector3(.25, .5, -.25),
+        //     new Vector3(0, 2, 0),
+        // ];
+        //
+        // const indices = [
+        //     new Vector3(0, 1, 2),
+        //     new Vector3(0, 2, 3),
+        //     new Vector3(0, 3, 4),
+        //     new Vector3(0, 4, 1),
+        //     new Vector3(5, 1, 4),
+        //     new Vector3(5, 4, 3),
+        //     new Vector3(5, 3, 2),
+        //     new Vector3(5, 2, 1),
+        // ];
+        //
+        // super(renderer, v, f, [
+        //     ...vertices[0], ...Vector3.normalFromPoints(...indices[0].points.map(i => vertices[i])),
+        //     ...vertices[1], ...Vector3.normalFromPoints(...indices[1].points.map(i => vertices[i])),
+        //     ...vertices[2], ...Vector3.normalFromPoints(...indices[2].points.map(i => vertices[i])),
+        //     ...vertices[3], ...Vector3.normalFromPoints(...indices[3].points.map(i => vertices[i])),
+        //     ...vertices[4], ...Vector3.normalFromPoints(...indices[4].points.map(i => vertices[i])),
+        //     ...vertices[5], ...Vector3.normalFromPoints(...indices[5].points.map(i => vertices[i])),
+        // ], indices.map(i => i.points));
+
         super(renderer, v, f, [
                0,  0,    0,
              .25, .5,  .25,
@@ -53,22 +80,10 @@ export default class Bone extends Renderable
         ]);
 
         this.program.world = Matrix4.identity.points;
-        this.program.projection = renderer.projection.points;
-
-        renderer.on({ resized: () => this.program.projection = renderer.projection.points });
     }
 
     render(renderer)
     {
-        const r = performance.now() * -.00025;
-        const d = 5;
-
-        this.program.view = Matrix4.lookAt(
-            new Vector3(d * Math.cos(r), 4, d * Math.sin(r)),
-            new Vector3(0, 0, 0),
-            new Vector3(0, 1, 0)
-        ).points;
-
         this.vao.draw(renderer.gl.TRIANGLES);
     }
 }
