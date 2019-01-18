@@ -15,7 +15,6 @@ export default class Renderable
             new Fragment(renderer, f)
         );
         this.vao = new Vao(renderer, this.program.attributes, vertices, indices);
-        // this.ubo = new Ubo(renderer, this.program.uniforms);
     }
 
     preRender(renderer)
@@ -25,6 +24,7 @@ export default class Renderable
 
     render(renderer)
     {
+        this.vao.draw(renderer.gl.TRIANGLES);
     }
 
     postRender(renderer)
