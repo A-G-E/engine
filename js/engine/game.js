@@ -3,6 +3,7 @@
 import * as Fyn from 'http://fyn-software.cpb/component/fyn.js';
 import { Matrix4, Vector3, Vector2 } from '../math/exports.js';
 import Renderer from './graphics/renderer.js';
+import Obj from './graphics/obj.js';
 import Ubo from './graphics/ubo.js';
 import Grid from './graphics/elements/grid.js';
 import Bone from './graphics/elements/bone.js';
@@ -41,13 +42,18 @@ export default class Game extends Fyn.Component
 
             requestAnimationFrame(draw);
         };
-
         draw();
 
         this.shadow.appendChild(renderer.canvas);
 
-        renderer.add(new Grid(renderer));
-        renderer.add(new Bone(renderer));
-        renderer.play();
+        fetch('../../bone.obj')
+            .then(r => r.text())
+            .then(t => {
+                renderer.add(new Grid(renderer));
+                // renderer.add(new Bone(renderer));
+                renderer.add(new Obj(renderer, t));
+                renderer.play();
+            });
+
     }
 }
