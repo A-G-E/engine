@@ -1,3 +1,4 @@
+import { Matrix4, Vector3 } from '../../math/exports.js';
 import Renderable from './renderable.js';
 
 const v = `#version 300 es
@@ -13,21 +14,10 @@ const v = `#version 300 es
         mat4 projection;
     };
     
-    uniform light{
-        vec3 lightDirection;
-        vec3 lightColour;
-        vec2 lightBias;
-    };
+    out vec3 v_normal;
     
-    flat out vec3 v_color;
-    
-    vec3 calculateLighting(){
-        float brightness = max(dot(-lightDirection, normalize(normal) * 0.5 - 0.5), 0.0);
-        return (lightColour * lightBias.x) + (brightness * lightColour * lightBias.y);
-    }
-    
-    void main(void) {           
-        v_color = calculateLighting();
+    void main(void) {
+        v_normal = (world * vec4(normal, 1.0)).xyz;
         
         gl_Position = projection * view * world * vec4(vertex, 1.0);
     }
@@ -35,53 +25,65 @@ const v = `#version 300 es
 const f = `#version 300 es
     precision mediump float;
     
-    flat in vec3 v_color;
+    in vec3 v_normal;
+    
+    const vec3 baseColor = vec3(.8, .5, .8);
+    const vec3 posLight = vec3(4.0, 3.0, 2.0);
+    const vec3 lightColor = vec3(0.25, 0.25, 0.25);
                 
     out vec4 color;
     
     void main(void) {
-        color = vec4(.8, .5, .8, 1.0) + vec4(v_color * 0.2, 1.0);
+        float diffAngle = max(dot(v_normal, normalize(posLight - v_normal)), 0.0);
+        color = vec4(baseColor + lightColor * diffAngle, 1.0);
     }
 `;
+const parse = content => {
+    let vertices = [];
+    let UVs = [];
+    let normals = [];
+    let faces = [];
+
+    for(const [type, ...args] of content.split('\n').map(l => l.split(' ')))
+    {
+        switch(type)
+        {
+            case 'v':
+                vertices.push(args.map(a => Number.parseFloat(a)));
+                break;
+
+            case 'vt':
+                UVs.push(args.map(a => Number.parseFloat(a)));
+                break;
+
+            case 'vn':
+                normals.push(args.map(a => Number.parseFloat(a)));
+                break;
+
+            case 'f':
+                faces.push(args.map(a => a.split('/').map(i => Number.parseInt(i) - 1)));
+                break;
+        }
+    }
+
+    return [ vertices, UVs, normals, faces ];
+};
 
 export default class Obj extends Renderable
 {
     constructor(renderer, content)
     {
-        let vertices = [];
-        let UVs = [];
-        let normals = [];
-        let faces = [];
+        const [ vertices, UVs, normals, faces ] = parse(content);
+
         let buffer = [];
         let indices = [];
-
-        for(const [ type, ...args ] of content.split('\n').map(l => l.split(' ')))
-        {
-            switch(type)
-            {
-                case 'v':
-                    vertices.push(args.map(a => Number.parseFloat(a)));
-                    break;
-
-                case 'vt':
-                    UVs.push(args.map(a => Number.parseFloat(a)));
-                    break;
-
-                case 'vn':
-                    normals.push(args.map(a => Number.parseFloat(a)));
-                    break;
-
-                case 'f':
-                    faces.push(args.map(a => a.split('/').map(i => Number.parseInt(i) - 1)));
-                    break;
-            }
-        }
+        let i = 0;
 
         for(const set of faces)
         {
             for(const [ v, vt, vn ] of set)
             {
-                indices.push(v);
+                indices.push(i);
                 buffer.push(...vertices[v]);
 
                 if(Number.isNaN(vt) === false)
@@ -90,9 +92,21 @@ export default class Obj extends Renderable
                 }
 
                 buffer.push(...normals[vn]);
+
+                i++;
             }
         }
 
         super(renderer, v, f, buffer, indices);
+    }
+
+    render(renderer)
+    {
+        this.program.world = Matrix4.identity
+            .translate(new Vector3(0, 1.5, 0))
+            .rotate(22.5 * Math.sin(performance.now() * .0025), new Vector3(1, 0, 0))
+            .points;
+
+        super.render(renderer);
     }
 }

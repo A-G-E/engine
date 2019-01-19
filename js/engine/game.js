@@ -46,7 +46,8 @@ export default class Game extends Fyn.Component
 
         this.shadow.appendChild(renderer.canvas);
 
-        fetch('../../bone.obj')
+        // fetch('../../bone.obj')
+        fetch('../../monkey.obj')
             .then(r => r.text())
             .then(t => {
                 renderer.add(new Grid(renderer));
