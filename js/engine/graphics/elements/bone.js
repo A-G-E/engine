@@ -14,21 +14,10 @@ const v = `#version 300 es
         mat4 projection;
     };
     
-    uniform light{
-        vec3 lightDirection;
-        vec3 lightColour;
-        vec2 lightBias;
-    };
-    
-    flat out vec3 v_color;
-    
-    vec3 calculateLighting(){
-        float brightness = max(dot(-lightDirection, normalize(normal) * 0.5 - 0.5), 0.0);
-        return (lightColour * lightBias.x) + (brightness * lightColour * lightBias.y);
-    }
+    out vec3 v_normal;
     
     void main(void) {           
-        v_color = calculateLighting();
+        v_normal = (world * vec4(normal, 1.0)).xyz;
         
         gl_Position = projection * view * world * vec4(vertex, 1.0);
     }
@@ -36,12 +25,20 @@ const v = `#version 300 es
 const f = `#version 300 es
     precision mediump float;
     
-    flat in vec3 v_color;
+    in vec3 v_normal;
+    
+    const vec3 baseColor = vec3(.8, .5, .8);
+    
+    uniform lighting{
+        vec3 position;
+        vec3 color;
+    } light;
                 
     out vec4 color;
     
     void main(void) {
-        color = vec4(.8, .5, .8, 1.0) + vec4(v_color * 0.2, 1.0);
+        float diffAngle = max(dot(v_normal, normalize(light.position - v_normal)), 0.0);
+        color = vec4(baseColor + light.color * diffAngle, 1.0);
     }
 `;
 

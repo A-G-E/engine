@@ -13,7 +13,8 @@ export default class Game extends Fyn.Component
     ready()
     {
         const renderer = new Renderer(this);
-        const camera = new Ubo('camera', renderer, {
+
+        const camera = new Ubo(renderer, 'camera', {
             view: Matrix4.lookAt(
                 new Vector3(5, 4, 5),
                 new Vector3(0, 0, 0),
@@ -22,10 +23,9 @@ export default class Game extends Fyn.Component
             projection: renderer.projection,
         });
 
-        const light = new Ubo('light', renderer, {
-            lightDirection: new Vector3(.3, -1, .5),
-            lightColour: new Vector3(1, .8, .8),
-            lightBias: new Vector2(.3, .8),
+        const lighting = new Ubo(renderer, 'lighting', {
+            position: new Vector3(3.0, 3.0, 5.0),
+            color: new Vector3(0.25, 0.25, 0.25),
         });
 
         renderer.on({ resized: () => camera.projection = renderer.projection });
@@ -51,7 +51,7 @@ export default class Game extends Fyn.Component
             .then(r => r.text())
             .then(t => {
                 renderer.add(new Grid(renderer));
-                // renderer.add(new Bone(renderer));
+                renderer.add(new Bone(renderer));
                 renderer.add(new Obj(renderer, t));
                 renderer.play();
             });

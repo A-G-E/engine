@@ -28,14 +28,17 @@ const f = `#version 300 es
     in vec3 v_normal;
     
     const vec3 baseColor = vec3(.8, .5, .8);
-    const vec3 posLight = vec3(4.0, 3.0, 2.0);
-    const vec3 lightColor = vec3(0.25, 0.25, 0.25);
+    
+    uniform lighting{
+        vec3 position;
+        vec3 color;
+    } light;
                 
     out vec4 color;
     
     void main(void) {
-        float diffAngle = max(dot(v_normal, normalize(posLight - v_normal)), 0.0);
-        color = vec4(baseColor + lightColor * diffAngle, 1.0);
+        float diffAngle = max(dot(v_normal, normalize(light.position - v_normal)), 0.0);
+        color = vec4(baseColor + light.color * diffAngle, 1.0);
     }
 `;
 const parse = content => {
@@ -103,7 +106,7 @@ export default class Obj extends Renderable
     render(renderer)
     {
         this.program.world = Matrix4.identity
-            .translate(new Vector3(0, 1.5, 0))
+            .translate(new Vector3(2.5, 1.5, 0))
             .rotate(22.5 * Math.sin(performance.now() * .0025), new Vector3(1, 0, 0))
             .points;
 
