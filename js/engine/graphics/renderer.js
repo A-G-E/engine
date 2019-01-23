@@ -1,3 +1,5 @@
+import Quad from './elements/quad.js';
+import Fbo from './fbo.js';
 import Renderable from './renderable.js';
 import { Matrix4 } from '../../math/exports.js';
 import * as Calculus from '../../math/exports.js';
@@ -34,6 +36,8 @@ export default class Renderer extends EventTarget
         this._playState = Renderer.stopped;
         this._stack = [];
         this._projection = Matrix4.perspective(FOV, 1, clip.near, clip.far);
+        this._frameBuffer = new Fbo(this);
+        this._quad = new Quad(this);
 
         const observer = new ResizeObserver(([ e ]) =>
         {
@@ -74,6 +78,8 @@ export default class Renderer extends EventTarget
     {
         this.clear();
 
+        this._frameBuffer.bind();
+
         for(let item of this._stack)
         {
             item.preRender(this);
@@ -81,9 +87,13 @@ export default class Renderer extends EventTarget
             item.postRender(this);
         }
 
+        this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
+
+        this._quad.preRender(this);
+        this._quad.render(this);
+
         if(this._playState === Renderer.playing)
         {
-            // setTimeout(()=>this.loop(), 1000);
             window.requestAnimationFrame(() => this.loop());
         }
     }

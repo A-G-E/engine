@@ -42,14 +42,24 @@ export default class Program
             throw new Error('validating the shader-program has failed');
         }
 
-        let matches = shaders
+        const ins = shaders
             .filter(s => s instanceof Vertex)
             .map(s => s.src
                 .split('\n')
-                .map(l => l.trim().match(/^(in|uniform)\s+([a-z][a-z0-9]+)\s+([a-zA-Z0-9_]+);$/))
+                .map(l => l.trim().match(/(in)\s+([a-z][a-zA-Z0-9]+)\s+([a-zA-Z0-9_]+);/))
                 .filter(l => l !== null)
             )
             .reduce((t, a) => [ ...t, ...a ], []);
+
+        const uniforms = shaders
+            .map(s => s.src
+                .split('\n')
+                .map(l => l.trim().match(/(uniform)\s+([a-z][a-zA-Z0-9]+)\s+([a-zA-Z0-9_]+);/))
+                .filter(l => l !== null)
+            )
+            .reduce((t, a) => [ ...t, ...a ], []);
+
+        const matches = [...ins, ...uniforms];
 
         let blocks = shaders
             .map(s => s.src.match(/uniform\s+([a-z][a-z0-9]+)\s*{\s*[^}]+\s*}\s*([a-z][a-z0-9]+)?;/g))
@@ -121,7 +131,9 @@ export default class Program
                 switch(modifier)
                 {
                     case 'Uniform':
-                        let t; let a;
+                        let t;
+                        let a;
+                        let s;
 
                         if(type.startsWith('mat'))
                         {
@@ -134,7 +146,16 @@ export default class Program
                             a = [ location, v ];
                         }
 
-                        self.gl[`uniform${t}${type.match(/[0-9]/)}fv`](...a);
+                        if(type === 'sampler2D')
+                        {
+                            s = 'uniform1i';
+                        }
+                        else
+                        {
+                            s = `uniform${t}${type.match(/[0-9]/)}fv`;
+                        }
+
+                        self.gl[s](...a);
 
                         return true;
 
