@@ -5,14 +5,18 @@ const v = `#version 300 es
     
     in vec2 vertex;
     
+    out vec2 pos;
+    
     void main(void) {
+        pos = vertex;
+    
         gl_Position = vec4(vertex, 0.0, 1.0);
     }
 `;
 const f = `#version 300 es
     precision mediump float;
     
-    const vec4 baseColor = vec4(.8, .5, .8, 1.0);
+    in vec2 pos;
     
     uniform sampler2D tex;
                 
@@ -20,7 +24,6 @@ const f = `#version 300 es
     
     void main(void) {
         color = texelFetch(tex, ivec2(gl_FragCoord.xy), 0);
-        // color = baseColor;
     }
 `;
 

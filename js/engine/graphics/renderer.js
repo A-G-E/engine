@@ -1,8 +1,7 @@
 import Quad from './elements/quad.js';
 import Fbo from './fbo.js';
 import Renderable from './renderable.js';
-import { Matrix4 } from '../../math/exports.js';
-import * as Calculus from '../../math/exports.js';
+import { Matrix4, Vector2 } from '../../math/exports.js';
 
 const FOV = 90 * Math.PI / 180;
 const clip = {
@@ -76,18 +75,14 @@ export default class Renderer extends EventTarget
 
     loop()
     {
-        this.clear();
-
-        this._frameBuffer.bind();
-
-        for(let item of this._stack)
-        {
-            item.preRender(this);
-            item.render(this);
-            item.postRender(this);
-        }
-
-        this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
+        this._frameBuffer.record(() => {
+            for(let item of this._stack)
+            {
+                item.preRender(this);
+                item.render(this);
+                item.postRender(this);
+            }
+        });
 
         this._quad.preRender(this);
         this._quad.render(this);
@@ -96,11 +91,6 @@ export default class Renderer extends EventTarget
         {
             window.requestAnimationFrame(() => this.loop());
         }
-    }
-
-    clear()
-    {
-        this._context.clear(this._context.COLOR_BUFFER_BIT | this._context.DEPTH_BUFFER_BIT);
     }
 
     add(element)
@@ -135,7 +125,7 @@ export default class Renderer extends EventTarget
 
     get size()
     {
-        return new Calculus.Vector2(this.width, this.height);
+        return new Vector2(this.width, this.height);
     }
 
     get gl()

@@ -33,16 +33,12 @@ export default class Game extends Fyn.Component
         const draw = () => {
             const r = performance.now() * .00025;
             const d = 5;
-            const pos = new Vector3(d * Math.cos(r), 4 + (Math.sin(r) * 2), d * Math.sin(r));
 
             camera.view = Matrix4.lookAt(
-                pos,
+                new Vector3(d * Math.cos(r), 4 + (Math.sin(r) * 2), d * Math.sin(r)),
                 new Vector3(0, 0, 0),
                 new Vector3(0, 1, 0)
             );
-
-            lighting.position = pos.multiply(5);
-            lighting.position.y = 3;
 
             requestAnimationFrame(draw);
         };
