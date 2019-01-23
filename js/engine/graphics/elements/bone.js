@@ -1,3 +1,4 @@
+import Vector3 from '../../../math/vector3.js';
 import Renderable from '../renderable.js';
 import { Matrix4 } from '../../../math/exports.js';
 
@@ -44,15 +45,15 @@ const f = `#version 300 es
 
 export default class Bone extends Renderable
 {
-    constructor(renderer)
+    constructor(renderer, length)
     {
         super(renderer, v, f, [
-               0,  0,    0,     0, -1,  0,
-             .25, .5,  .25,     0,  0, -1,
-            -.25, .5,  .25,     0, -1,  0,
-            -.25, .5, -.25,     0,  0,  1,
-             .25, .5, -.25,     0,  1,  0,
-               0,  2,    0,     0,  1,  0,
+              0,   0,   0,     0, -1,  0,
+             .1, .25,  .1,     0,  0, -1,
+            -.1, .25,  .1,     0, -1,  0,
+            -.1, .25, -.1,     0,  0,  1,
+             .1, .25, -.1,     0,  1,  0,
+              0,   1,   0,     0,  1,  0,
         ], [
             0, 1, 2,
             0, 2, 3,
@@ -65,6 +66,25 @@ export default class Bone extends Renderable
             5, 2, 1,
         ]);
 
-        this.program.world = Matrix4.identity.points;
+        this.world = Matrix4.identity;
+        this._length = length;
+    }
+
+    get length()
+    {
+        return this._length;
+    }
+
+    get world()
+    {
+        return this._world;
+    }
+
+    set world(m)
+    {
+        m = m.scale(new Vector3(this._length / 2, this._length, this._length / 2));
+
+        this._world = m;
+        this.program.world = m.points;
     }
 }

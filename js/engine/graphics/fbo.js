@@ -30,7 +30,7 @@ export default class Fbo
     record(callback)
     {
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this._buffer);
-        
+
         this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
 
         callback();

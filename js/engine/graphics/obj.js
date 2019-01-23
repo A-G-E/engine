@@ -27,7 +27,7 @@ const f = `#version 300 es
     
     in vec3 v_normal;
     
-    const vec3 baseColor = vec3(.8, .5, .8);
+    const vec3 baseColor = vec3(.2, .8, .2);
     
     uniform lighting{
         vec3 position;
@@ -106,7 +106,7 @@ export default class Obj extends Renderable
     render(renderer)
     {
         this.program.world = Matrix4.identity
-            .translate(new Vector3(0, 1.5, 0))
+            .translate(new Vector3(5, 1.5, 0))
             .rotate(11.25 * Math.sin(performance.now() * .0025), new Vector3(1, 0, 0))
             .translate(new Vector3(0, .6, .3))
             .points;
