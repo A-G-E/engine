@@ -22,9 +22,6 @@
     },
     "dependencies": {
         "@fyn-software/component": "0.0.2",
-        "@fyn-software/suite": "0.0.2"
-    },
-    "devDependencies": {
-        "npm-github-release": "0.9.0"
+        "@fyn-software/suite": "0.0.4"
     }
 }
