@@ -1,5 +1,3 @@
-'use strict';
-
-import * as Extends from './extends.js';
+import './extends.js';
 
 export default{};

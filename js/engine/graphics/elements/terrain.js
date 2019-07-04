@@ -1,10 +1,8 @@
-'use strict';
-
 import Buffer from '../buffer.js';
 import Program from '../program.js';
 import Vertex from '../shaders/vertex.js';
 import Fragment from '../shaders/fragment.js';
-import { Vector2, Vector3, Matrix4, Plane } from '../../../math/exports.js';
+import { Vector2, Vector3, Matrix4 } from '../../../math/exports.js';
 import perlin from '../../../lib/perlin.js';
 
 export default class Terrain
@@ -13,190 +11,196 @@ export default class Terrain
     {
         this.size = size;
 
-        let load = p => fetch(p, { credentials: 'same-origin' }).then(r => r.text());
+        this.init();
+    }
 
-        Promise.all([ load('vertex.glsl'), load('fragment.glsl') ]).then(([ v, f ]) =>
+    async init()
+    {
+        const load = p => fetch(p, { credentials: 'same-origin' }).then(r => r.text());
+        const [v, f] = await Promise.all([
+            load('vertex.glsl'),
+            load('fragment.glsl')
+        ]);
+
+        console.log('terrain loaded');
+
+        this.program = new Program(
+            renderer,
+            new Vertex(renderer, v),
+            new Fragment(renderer, f)
+        );
+
+        this.buffer = [];
+        this.indices = [];
+
+        let biome = [ [ 0, 130,  76,   6 ], [ .3,  78, 168,  15 ], [ .8, 178, 110,   0 ], [ 1, 255, 255, 255 ] ];
+        let r = .25;
+        let a = 2.5;
+        let map = (s, e, v) => s + (e - s) * v;
+        let color = z =>
         {
-            console.log('terrain loaded');
+            let i = biome.findIndex(v => v[0] >= z);
 
-            this.program = new Program(
-                renderer,
-                new Vertex(renderer, v),
-                new Fragment(renderer, f)
+            if(i === 0)
+            {
+                return new Vector3(...biome[i].slice(1));
+            }
+
+            let v1 = biome[i - 1];
+            let v2 = biome[i];
+
+            return new Vector3(
+                map(v1[1], v2[1], z) / 255,
+                map(v1[2], v2[2], z) / 255,
+                map(v1[3], v2[3], z) / 255
             );
+        };
+        let vertex = (x, y) => new Vector3(x, perlin(x * r, y * r), y);
+        let buffer = (vertex, normal, color) => this.buffer.push(...vertex, ...normal, ...color);
+        let gridSquare = (row, col, indices) =>
+        {
+            let vertices = [ vertex(col, row), vertex(col + 1, row), vertex(col, row + 1), vertex(col + 1, row + 1) ];
+            let colors = [ color(vertices[1].y), color(vertices[1].y), color(vertices[1].y), color(vertices[1].y) ];
 
-            this.buffer = [];
-            this.indices = [];
-
-            let biome = [ [ 0, 130,  76,   6 ], [ .3,  78, 168,  15 ], [ .8, 178, 110,   0 ], [ 1, 255, 255, 255 ] ];
-            let r = .25;
-            let a = 2.5;
-            let map = (s, e, v) => s + (e - s) * v;
-            let color = z =>
+            vertices.forEach(v =>
             {
-                let i = biome.findIndex(v => v[0] >= z);
+                v.x += (perlin(v.y, v.z) - .5) / 2;
+                v.z += (perlin(v.x, v.y) - .5) / 2;
+                v.y *= a;
+            });
 
-                if(i === 0)
-                {
-                    return new Vector3(...biome[i].slice(1));
-                }
+            let normals = [ Vector3.normalFromPoints(vertices[indices[0]], vertices[indices[1]], vertices[indices[2]]), Vector3.normalFromPoints(vertices[indices[3]], vertices[indices[4]], vertices[indices[5]]) ];
 
-                let v1 = biome[i - 1];
-                let v2 = biome[i];
+            return { vertices, colors, normals };
+        };
+        let lastRow = [];
 
-                return new Vector3(
-                    map(v1[1], v2[1], z) / 255,
-                    map(v1[2], v2[2], z) / 255,
-                    map(v1[3], v2[3], z) / 255
-                );
-            };
-            let vertex = (x, y) => new Vector3(x, perlin(x * r, y * r), y);
-            let buffer = (vertex, normal, color) => this.buffer.push(...vertex, ...normal, ...color);
-            let gridSquare = (row, col, indices) =>
+        for(let z = 0.0; z < size.y; z++)
+        {
+            for(let x = 0.0; x < size.x; x++)
             {
-                let vertices = [ vertex(col, row), vertex(col + 1, row), vertex(col, row + 1), vertex(col + 1, row + 1) ];
-                let colors = [ color(vertices[1].y), color(vertices[1].y), color(vertices[1].y), color(vertices[1].y) ];
+                let indices = [];
 
-                vertices.forEach(v =>
+                // Buffer indices
                 {
-                    v.x += (perlin(v.y, v.z) - .5) / 2;
-                    v.z += (perlin(v.x, v.y) - .5) / 2;
-                    v.y *= a;
-                });
-
-                let normals = [ Vector3.normalFromPoints(vertices[indices[0]], vertices[indices[1]], vertices[indices[2]]), Vector3.normalFromPoints(vertices[indices[3]], vertices[indices[4]], vertices[indices[5]]) ];
-
-                return { vertices, colors, normals };
-            };
-            let lastRow = [];
-
-            for(let z = 0.0; z < size.y; z++)
-            {
-                for(let x = 0.0; x < size.x; x++)
-                {
-                    let indices = [];
-
-                    // Buffer indices
+                    let i = (col, row) =>
                     {
-                        let i = (col, row) =>
+                        let doubleRows = Math.min(row, size.y - 1) * (size.x - 1);
+                        let column = col * (row < size.y - 1 ? 2 : 1);
+
+                        return row * (size.x + 1) + doubleRows + column;
+                    };
+                    let vertices = [
+                        i(x, z),         // Top-left
+                        i(x, z) + 1,     // Top-right
+                        i(x, z + 1),     // Bottom-left
+                        i(x, z + 1) + 1, // Bottom-right
+                    ];
+
+                    if(z < size.y - 1)
+                    {
+                        switch((z % 2) * 2 + x % 2)
                         {
-                            let doubleRows = Math.min(row, size.y - 1) * (size.x - 1);
-                            let column = col * (row < size.y - 1 ? 2 : 1);
+                            case 0:
+                                indices = [ 0, 3, 2, 1, 3, 0 ];
 
-                            return row * (size.x + 1) + doubleRows + column;
-                        };
-                        let vertices = [
-                            i(x, z),         // Top-left
-                            i(x, z) + 1,     // Top-right
-                            i(x, z + 1),     // Bottom-left
-                            i(x, z + 1) + 1, // Bottom-right
-                        ];
+                                break;
+                            case 1:
+                                indices = [ 0, 1, 2, 1, 3, 2 ];
 
-                        if(z < size.y - 1)
-                        {
-                            switch((z % 2) * 2 + x % 2)
-                            {
-                                case 0:
-                                    indices = [ 0, 3, 2, 1, 3, 0 ];
+                                break;
+                            case 2:
+                                indices = [ 1, 3, 2, 0, 1, 2 ];
 
-                                    break;
-                                case 1:
-                                    indices = [ 0, 1, 2, 1, 3, 2 ];
+                                break;
+                            case 3:
+                                indices = [ 1, 3, 0, 0, 3, 2 ];
 
-                                    break;
-                                case 2:
-                                    indices = [ 1, 3, 2, 0, 1, 2 ];
-
-                                    break;
-                                case 3:
-                                    indices = [ 1, 3, 0, 0, 3, 2 ];
-
-                                    break;
-                            }
+                                break;
                         }
-                        else
+                    }
+                    else
+                    {
+                        switch((z % 2) * 2 + x % 2)
                         {
-                            switch((z % 2) * 2 + x % 2)
-                            {
-                                case 0:
-                                    indices = [ 3, 0, 2, 1, 3, 0 ];
+                            case 0:
+                                indices = [ 3, 0, 2, 1, 3, 0 ];
 
-                                    break;
-                                case 1:
-                                    indices = [ 3, 2, 2, 1, 3, 2 ];
+                                break;
+                            case 1:
+                                indices = [ 3, 2, 2, 1, 3, 2 ];
 
-                                    break;
-                                case 2:
-                                    indices = [ 1, 3, 2, 0, 1, 2 ];
+                                break;
+                            case 2:
+                                indices = [ 1, 3, 2, 0, 1, 2 ];
 
-                                    break;
-                                case 3:
-                                    indices = [ 1, 3, 0, 0, 3, 2 ];
+                                break;
+                            case 3:
+                                indices = [ 1, 3, 0, 0, 3, 2 ];
 
-                                    break;
-                            }
-
-                            let t = indices[0];
-                            indices[0] = indices[1];
-                            indices[1] = t;
+                                break;
                         }
 
-                        // This.indices.push(indices.map(i => vertices[i]).join(','));
-                        this.indices.push(...indices.map(i => vertices[i]));
+                        let t = indices[0];
+                        indices[0] = indices[1];
+                        indices[1] = t;
                     }
 
-                    // Buffer vertices
+                    // This.indices.push(indices.map(i => vertices[i]).join(','));
+                    this.indices.push(...indices.map(i => vertices[i]));
+                }
+
+                // Buffer vertices
+                {
+                    let { vertices, colors, normals } = gridSquare(z, x, indices);
+
+                    // Top-left
+                    buffer(vertices[0], normals[0], colors[0]);
+
+                    if((z !== size.y - 1 || x === size.x - 1))
                     {
-                        let { vertices, colors, normals } = gridSquare(z, x, indices);
+                        // Top-right
+                        buffer(vertices[1], normals[1], colors[1]);
+                    }
 
-                        // Top-left
-                        buffer(vertices[0], normals[0], colors[0]);
-
-                        if((z !== size.y - 1 || x === size.x - 1))
+                    if(z === size.y - 1)
+                    {
+                        if(x === 0)
                         {
-                            // Top-right
-                            buffer(vertices[1], normals[1], colors[1]);
+                            // Bottom-left
+                            lastRow.push([ vertices[2], normals[0], colors[2] ]);
                         }
 
-                        if(z === size.y - 1)
-                        {
-                            if(x === 0)
-                            {
-                                // Bottom-left
-                                lastRow.push([ vertices[2], normals[0], colors[2] ]);
-                            }
-
-                            // Bottom-right
-                            lastRow.push([ vertices[3], normals[1], colors[3] ]);
-                        }
+                        // Bottom-right
+                        lastRow.push([ vertices[3], normals[1], colors[3] ]);
                     }
                 }
             }
+        }
 
-            for(let x of lastRow)
-            {
-                buffer(...x);
-            }
+        for(let x of lastRow)
+        {
+            buffer(...x);
+        }
 
-            let bv = new Buffer(renderer, [ [ this.program['vertex'], 3 ], [ this.program['normal'], 3 ], [ this.program['color'], 3 ] ]);
-            bv.data = new Float32Array(this.buffer);
+        let bv = new Buffer(renderer, [ [ this.program['vertex'], 3 ], [ this.program['normal'], 3 ], [ this.program['color'], 3 ] ]);
+        bv.data = new Float32Array(this.buffer);
 
-            let bi = new Buffer(renderer, [], renderer.gl.ELEMENT_ARRAY_BUFFER);
-            bi.data = new Uint16Array(this.indices);
+        let bi = new Buffer(renderer, [], renderer.gl.ELEMENT_ARRAY_BUFFER);
+        bi.data = new Uint16Array(this.indices);
 
-            let world = Matrix4.identity
-                .rotate(60, new Vector3(1, 0, 0))
-                .translate(new Vector3(-size.x / 2, 0, -size.y / 2));
+        let world = Matrix4.identity
+            .rotate(60, new Vector3(1, 0, 0))
+            .translate(new Vector3(-size.x / 2, 0, -size.y / 2));
 
-            this.program.world = world.points;
-            this.program.view = view.points;
-            this.program.projection = projection.points;
-            this.program.lightDirection = new Vector3(.3, -1, .5).points;
-            this.program.lightColour = new Vector3(1, .8, .8).points;
-            this.program.lightBias = new Vector2(.3, .8).points;
+        this.program.world = world.points;
+        this.program.view = view.points;
+        this.program.projection = projection.points;
+        this.program.lightDirection = new Vector3(.3, -1, .5).points;
+        this.program.lightColour = new Vector3(1, .8, .8).points;
+        this.program.lightBias = new Vector2(.3, .8).points;
 
-            this.loaded = true;
-        });
+        this.loaded = true;
     }
 
     render(renderer)

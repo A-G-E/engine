@@ -1,5 +1,3 @@
-'use strict';
-
 export default class Animation
 {
     static ease(callback, options = {})

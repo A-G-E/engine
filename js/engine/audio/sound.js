@@ -1,5 +1,3 @@
-'use strict';
-
 import Resources from '../network/resources.js';
 import Config from '../config.js';
 

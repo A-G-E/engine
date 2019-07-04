@@ -1,5 +1,3 @@
-'use strict';
-
 export default class Store
 {
     constructor(name, database, data)

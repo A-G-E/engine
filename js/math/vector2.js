@@ -1,5 +1,3 @@
-'use strict';
-
 export default class Vector2
 {
     constructor(x, y)
@@ -124,8 +122,6 @@ export default class Vector2
 
         this.x = magnitude * Math.cos(angle * Math.PI / 180);
         this.y = magnitude * Math.sin(angle * Math.PI / 180);
-
-        return this;
     }
 
     get snapped()

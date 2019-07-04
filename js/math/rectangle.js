@@ -1,5 +1,3 @@
-'use strict';
-
 export default class Rectangle
 {
     constructor(x, y, w, h)
@@ -60,7 +58,7 @@ export default class Rectangle
 
     set width(w)
     {
-        return this._w = w;
+        this._w = w;
     }
 
     get height()
@@ -70,7 +68,7 @@ export default class Rectangle
 
     set height(h)
     {
-        return this._h = h;
+        this._h = h;
     }
 
     get position()

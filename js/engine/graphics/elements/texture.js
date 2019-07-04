@@ -1,5 +1,3 @@
-'use strict';
-
 import RenderElement from '../renderElement.js';
 import Buffer from '../buffer.js';
 import * as Calculus from '../../../math/exports.js';

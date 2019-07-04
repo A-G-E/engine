@@ -1,5 +1,3 @@
-'use strict';
-
 import Vector2 from './vector2.js';
 import Vector3 from './vector3.js';
 import Vector4 from './vector4.js';

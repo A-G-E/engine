@@ -1,6 +1,4 @@
-'use strict';
-
-import * as Fyn from 'http://fyn-software.cpb/component/fyn.js';
+import * as Fyn from '/node_modules/@fyn-software/component/fyn.js';
 import { Matrix4, Vector3 } from '../math/exports.js';
 import Renderer from './graphics/renderer.js';
 import Obj from './graphics/obj.js';
@@ -35,7 +33,7 @@ export default class Game extends Fyn.Component
         fetch('../../monkey.obj')
             .then(r => r.text())
             .then(t => {
-                const bones = Array.from(Array(10), i => new Bone(renderer, Math.round(5 * Math.random())));
+                const bones = Array.from(Array(10), i => new Bone(renderer, Math.round(4 + 2 * Math.random())));
 
                 console.log(bones);
 

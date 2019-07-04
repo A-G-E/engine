@@ -1,5 +1,3 @@
-'use strict';
-
 import Store from './store.js';
 
 export default class Database

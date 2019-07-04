@@ -1,9 +1,5 @@
 import Renderable from '../renderable.js';
-import Vao from '../vao.js';
-import Program from '../program.js';
-import Vertex from '../shaders/vertex.js';
-import Fragment from '../shaders/fragment.js';
-import { Matrix4, Vector3 } from '../../../math/exports.js';
+import { Matrix4 } from '../../../math/exports.js';
 
 export default class Grid extends Renderable
 {

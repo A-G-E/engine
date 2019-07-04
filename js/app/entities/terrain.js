@@ -1,5 +1,3 @@
-'use strict';
-
 import * as Rasher from '../../rasher.js';
 import * as Calculus from '../../math/exports.js';
 import Tile from './tile.js';

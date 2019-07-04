@@ -1,5 +1,3 @@
-'use strict';
-
 export default class Buffer
 {
     constructor(renderer, attributes, data = [], type = null)
