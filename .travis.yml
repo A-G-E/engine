@@ -1,0 +1,21 @@
+notifications:
+  email: false
+
+language: node_js
+node_js: node
+
+deploy:
+  - provider: script
+    skip_cleanup: true
+    script: bash .travis/pu.sh $TRAVIS_TAG
+    on:
+      tags: true
+      branch: master
+  - provider: npm
+    email: chris@cgames.nl
+    skip_cleanup: true
+    api_key:
+      secure: "26xt3VmhCAJ1ai8lL9Zi2U29vppIVvQpreluWQwgeAD2piz/qq1mwgdQiJh6RsgSMuGoBuOfPOEDtU0e0KMEPD0qK5uWqJeTB36a0Q/cjE5g6TBLfswkdvfi3QpVxKKpuarzepXZ6WsP2br2l+O/CIr2pNUKfrFYJ05m4PtkaxKjoAfNNd22MTDQTbfRLYuJBPaKTknAU3GHc6ujR6mRtAEZJnFcsIAaM/8DsNzk90C89g6tbJN931uffbBIKp7c6ZB3+FW6KcXIKTA09njShXtJtw/pgivJhgThekxRiWmnKRIVVlJrSP6PWtX4a9RLRsZOkGj0M8kM4EU9At9QFbH+uSLpx8LvYCM4va42ZXmgt8kxJf/jC41y7E03BjauXg3zzINfdyUy3jAVrlaZ9B3EziNz8F+RKF+DJNNBC3OSQNBZDdIvpl3PX723S5BPi6ldAk7by6F77aXqrc1rPW8ynuLQgpIEPmr+yBdSx0u/565KfRGjnAgVlsNINNGFMgUSoCTQC+O7fFgNqSSftJ8/UxrZL8gCxTUuNV51Yfjc4inb9vxScUtuYzpc7E2NoIhwjrXfN0p1RUkyLCt1bflMSw3B+ZZatn7huyekrZY0KNxHm0/a9YNKPNHBWwBYtp6q2bs9qEqBoA0/91L0D+n4x0gGsstm1oPtn5BDS2A="
+    on:
+      tags: true
+      branch: master
