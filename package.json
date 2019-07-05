@@ -22,6 +22,8 @@
     },
     "dependencies": {
         "@fyn-software/component": "0.0.2",
-        "@fyn-software/suite": "0.0.5"
+        "@fyn-software/suite": "0.0.5",
+        "@fyn-software/core": "0.0.1",
+        "@fyn-software/data": "0.0.2"
     }
 }
