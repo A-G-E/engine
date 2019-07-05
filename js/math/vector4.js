@@ -1,5 +1,3 @@
-'use strict';
-
 import Vector2 from './vector2.js';
 
 export default class Vector4

@@ -1,7 +1,4 @@
-'use strict';
-
 import * as Rasher from '../../rasher.js';
-import * as Calculus from '../../math/exports.js';
 
 export default class Tile extends Rasher.Entity
 {

@@ -1,5 +1,3 @@
-'use strict';
-
 import Texture from './texture.js';
 import Vector2 from '../../../math/vector2.js';
 
@@ -12,12 +10,11 @@ export default class Background extends Texture
         this._blinkInterval = null;
     }
 
-    load()
+    async load()
     {
-        return super.load().then(img =>
-        {
-            this._srcSize = new Vector2(img.width, img.height);
-        });
+        const img = await super.load();
+
+        this._srcSize = new Vector2(img.width, img.height);
     }
 
     render(i)

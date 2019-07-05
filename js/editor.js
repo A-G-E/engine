@@ -1,17 +1,18 @@
-import * as Fyn from 'http://fyn-software.cpb/component/fyn.js';
-import Docks from 'http://fyn-software.cpb/suite/js/common/layout/docks.js';
+import * as Fyn from '/node_modules/@fyn-software/component/fyn.js';
+import { Layout } from '/node_modules/@fyn-software/suite/js/common/layout/docks.js';
+import { Direction } from '/node_modules/@fyn-software/suite/js/common/layout/resizable.js';
 
 export default class Editor extends Fyn.Component
 {
     static get properties()
     {
         return {
-            layout: {
-                mode: Docks.horizontal,
+            layout: Layout.default({
+                mode: Direction.horizontal,
                 sizes: [ null, 150 ],
                 children: [
                     {
-                        mode: Docks.vertical,
+                        mode: Direction.vertical,
                         sizes: [ null, 300 ],
                         children: [
                             [ 2, 3, 4 ],
@@ -20,7 +21,7 @@ export default class Editor extends Fyn.Component
                     },
                     [ 1, 7 ],
                 ],
-            },
+            }),
         };
     }
 }

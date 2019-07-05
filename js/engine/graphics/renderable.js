@@ -1,5 +1,4 @@
 import Vao from './vao.js';
-import Ubo from './ubo.js';
 import Program from './program.js';
 import Vertex from './shaders/vertex.js';
 import Fragment from './shaders/fragment.js';

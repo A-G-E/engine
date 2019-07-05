@@ -1,5 +1,3 @@
-'use strict';
-
 import Shader from '../shader.js';
 
 export default class Vertex extends Shader

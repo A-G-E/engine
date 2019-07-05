@@ -7,7 +7,8 @@
 
         <title>Voy A.G.E</title>
 
-        <link rel="stylesheet" type="text/css" href="http://fyn-software.cpb/suite/css/style.css">
+        <link rel="stylesheet" type="text/css" href="/node_modules/@fyn-software/suite/css/style.css">
+        <link rel="stylesheet" type="text/css" href="/node_modules/@fyn-software/suite/css/style.css">
 
         <style>
             cpb-editor {
@@ -21,13 +22,14 @@
         <cpb-editor></cpb-editor>
 
         <script type="module">
-            import * as Fyn from 'http://fyn-software.cpb/component/fyn.js';
+            import * as Fyn from '/node_modules/@fyn-software/component/fyn.js';
+            
+            Fyn.Composer.register({
+                fyn: (n, t) => `/node_modules/@fyn-software/suite/${t}/${n.join('/')}.${t}`,
+                cpb: (n, t, ns) => `/${t}/${ n.join('/')}.${t}`,
+            });
 
             Fyn.Component.load('cpb-editor');
-
-            // navigator.registerProtocolHandler('web+component', '#this-is-a-hash%s', 'Web component handler');
-            //
-            // fetch('web+component:cpb-editor', { mode: 'no-cors' }).then(r => console.log(r));
         </script>
     </body>
 </html>

@@ -95,7 +95,7 @@ export default class Renderer extends EventTarget
 
     add(element)
     {
-        if(!element instanceof Renderable)
+        if((element instanceof Renderable) == false)
         {
             throw new Error('Renderer.add expected an Renderable, got something else');
         }

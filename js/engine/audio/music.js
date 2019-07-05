@@ -1,5 +1,3 @@
-'use strict';
-
 import Sound from './sound.js';
 
 export default class Music extends Sound

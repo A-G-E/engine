@@ -1,5 +1,3 @@
-'use strict';
-
 import Sprite from '../graphics/elements/sprite.js';
 import Animation from '../graphics/animation.js';
 import * as Calculus from '../../math/exports.js';

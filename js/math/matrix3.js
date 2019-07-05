@@ -1,5 +1,3 @@
-'use strict';
-
 export default class Matrix3
 {
     constructor(points = null)
