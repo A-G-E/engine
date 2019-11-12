@@ -1,5 +1,3 @@
-'use struct';
-
 export default class Input
 {
     constructor(conf)

@@ -1,5 +1,3 @@
-'use strict';
-
 import Renderer from './graphics/renderer.js';
 import Resources from './network/resources.js';
 import Config from './config.js';
