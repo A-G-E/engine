@@ -8,32 +8,31 @@ import Bone from './graphics/elements/bone.js';
 
 export default class Game extends Fyn.Component
 {
+    #renderer = new Renderer(this);
+    #camera = new Ubo(this.#renderer, 'camera', {
+        view: Matrix4.lookAt(
+            new Vector3(15, 4, 15),
+            new Vector3(0, 0, 0),
+            new Vector3(0, 1, 0)
+        ),
+        projection: this.#renderer.projection,
+    });
+
     ready()
     {
-        const renderer = new Renderer(this);
-
-        const camera = new Ubo(renderer, 'camera', {
-            view: Matrix4.lookAt(
-                new Vector3(15, 4, 15),
-                new Vector3(0, 0, 0),
-                new Vector3(0, 1, 0)
-            ),
-            projection: renderer.projection,
-        });
-
-        new Ubo(renderer, 'lighting', {
+        new Ubo(this.#renderer, 'lighting', {
             position: new Vector3(5.0, 3.0, 5.0),
             color: new Vector3(0.25, 0.25, 0.25),
         });
 
-        renderer.on({ resized: () => camera.projection = renderer.projection });
+        this.#renderer.on({ resized: () => this.#camera.projection = this.#renderer.projection });
 
-        this.shadow.appendChild(renderer.canvas);
+        this.shadow.appendChild(this.#renderer.canvas);
 
         fetch('../../monkey.obj')
             .then(r => r.text())
             .then(t => {
-                const bones = Array.from(Array(10), i => new Bone(renderer, Math.round(4 + 2 * Math.random())));
+                const bones = Array.from(Array(10), i => new Bone(this.#renderer, Math.round(4 + 2 * Math.random())));
 
                 console.log(bones);
 
@@ -41,7 +40,7 @@ export default class Game extends Fyn.Component
                     const r = performance.now() * .00025;
                     const d = 15;
 
-                    camera.view = Matrix4.lookAt(
+                    this.#camera.view = Matrix4.lookAt(
                         new Vector3(d * Math.cos(r), 14 + (Math.sin(r) * 2), d * Math.sin(r)),
                         new Vector3(0, 0, 0),
                         new Vector3(0, 1, 0)
@@ -61,10 +60,10 @@ export default class Game extends Fyn.Component
                 };
                 draw();
 
-                renderer.add(new Grid(renderer));
-                bones.forEach(b => renderer.add(b));
-                renderer.add(new Obj(renderer, t));
-                renderer.play();
+                this.#renderer.add(new Grid(this.#renderer));
+                bones.forEach(b => this.#renderer.add(b));
+                this.#renderer.add(new Obj(this.#renderer, t));
+                this.#renderer.play();
             });
 
     }
