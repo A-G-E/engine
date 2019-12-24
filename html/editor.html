@@ -52,10 +52,10 @@
         <fyn-common-form-button icons="link"></fyn-common-form-button>
     </fyn-common-form-group>
 
-    <fyn-common-form-dropdown options="[ 'mobile-alt', 'tablet-alt', 'desktop' ]">
+    <fyn-common-form-dropdown options="{{ sizes }}">
         <fyn-common-graphics-icon slot="placeholder" icons="eye"></fyn-common-graphics-icon>
 
-        <fyn-common-graphics-icon icons="{{ option.value }}"></fyn-common-graphics-icon>
+        <fyn-common-graphics-icon icons="{{ option.icon }}"></fyn-common-graphics-icon>
     </fyn-common-form-dropdown>
 </toolbar>
 
