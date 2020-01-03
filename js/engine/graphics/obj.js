@@ -74,7 +74,7 @@ const parse = content => {
 
 export default class Obj extends Renderable
 {
-    constructor(renderer, content)
+    constructor(context, content)
     {
         const [ vertices, UVs, normals, faces ] = parse(content);
 
@@ -100,7 +100,7 @@ export default class Obj extends Renderable
             }
         }
 
-        super(renderer, v, f, buffer, indices);
+        super(context, v, f, buffer, indices);
     }
 
     render(renderer)

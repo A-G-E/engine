@@ -10,12 +10,19 @@ let bindIndex = 0;
 
 export default class Ubo
 {
+    #context;
+    #buffer;
+    #name;
+    #index;
+    #variables;
+    #sizes;
+
     static get(name)
     {
         return registration.get(name);
     }
 
-    constructor(renderer, name, conf)
+    constructor(context, name, conf)
     {
         if(registration.has(name))
         {
@@ -24,19 +31,20 @@ export default class Ubo
 
         registration.set(name, this);
 
-        this.gl = renderer.gl;
-        this._name = name;
-        this._index = bindIndex;
-        this._buffer = renderer.gl.createBuffer();
-        this._variables = new Map(Object.entries(conf));
-        this._sizes = Array.from(this._variables.values(), v => sizes.get(v.constructor.name));
+        this.#context = context;
+        this.#buffer = context.createBuffer();
 
-        bindIndex++;
+        this.#name = name;
+        this.#index = bindIndex;
+        this.#variables = new Map(Object.entries(conf));
+        this.#sizes = Array.from(this.#variables.values(), v => sizes.get(v.constructor.name));
 
         // Allowcate memory
-        this.gl.bindBuffer(this.gl.UNIFORM_BUFFER, this._buffer);
-        this.gl.bufferData(this.gl.UNIFORM_BUFFER, this._sizes.sum, this.gl.DYNAMIC_DRAW);
-        this.gl.bindBuffer(this.gl.UNIFORM_BUFFER, null);
+        this.#context.bindBuffer(this.#context.UNIFORM_BUFFER, this.#buffer);
+        this.#context.bufferData(this.#context.UNIFORM_BUFFER, this.#sizes.sum, this.#context.DYNAMIC_DRAW);
+        this.#context.bindBuffer(this.#context.UNIFORM_BUFFER, null);
+
+        bindIndex++;
 
         for(const [k, v] of Object.entries(conf))
         {
@@ -52,7 +60,7 @@ export default class Ubo
                     return self[p];
                 }
 
-                return self._variables.get(p);
+                return self.#variables.get(p);
             },
             set: (c, p, v) => {
                 if(p in self)
@@ -66,29 +74,29 @@ export default class Ubo
 
                 return true;
             },
-            has: (c, p) => self._variables.hasOwnProperty(p),
+            has: (c, p) => self.#variables.hasOwnProperty(p),
         });
     }
 
     set(key, value)
     {
-        if(this._variables.has(key) === false)
+        if(this.#variables.has(key) === false)
         {
             throw new Error(`Trying to set unknown property ${key}`);
         }
 
-        this._variables.set(key, value);
+        this.#variables.set(key, value);
 
-        const i = Array.from(this._variables.keys()).findIndex(k => k === key);
+        const i = Array.from(this.#variables.keys()).findIndex(k => k === key);
 
-        this.gl.bindBuffer(this.gl.UNIFORM_BUFFER, this._buffer);
-        this.gl.bufferSubData(this.gl.UNIFORM_BUFFER, this._sizes.slice(0, i).sum, new Float32Array(value.points));
-        this.gl.bindBuffer(this.gl.UNIFORM_BUFFER, null);
-        this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, this._index, this._buffer);
+        this.#context.bindBuffer(this.#context.UNIFORM_BUFFER, this.#buffer);
+        this.#context.bufferSubData(this.#context.UNIFORM_BUFFER, this.#sizes.slice(0, i).sum, new Float32Array(value.points));
+        this.#context.bindBuffer(this.#context.UNIFORM_BUFFER, null);
+        this.#context.bindBufferBase(this.#context.UNIFORM_BUFFER, this.#index, this.#buffer);
     }
 
     get index()
     {
-        return this._index;
+        return this.#index;
     }
 }

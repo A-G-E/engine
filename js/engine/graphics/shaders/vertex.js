@@ -2,8 +2,8 @@ import Shader from '../shader.js';
 
 export default class Vertex extends Shader
 {
-    constructor(renderer, path)
+    constructor(context, path)
     {
-        super(renderer, renderer.gl.VERTEX_SHADER, path);
+        super(context, context.VERTEX_SHADER, path);
     }
 }

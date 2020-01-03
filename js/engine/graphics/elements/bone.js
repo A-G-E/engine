@@ -45,9 +45,9 @@ const f = `#version 300 es
 
 export default class Bone extends Renderable
 {
-    constructor(renderer, length)
+    constructor(context, length)
     {
-        super(renderer, v, f, [
+        super(context, v, f, [
               0,   0,   0,     0, -1,  0,
              .1, .25,  .1,     0,  0, -1,
             -.1, .25,  .1,     0, -1,  0,

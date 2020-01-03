@@ -1,74 +1,79 @@
 export default class Fbo
 {
+    #context;
+    #renderer;
+    #buffer;
+    #types;
+
     constructor(renderer)
     {
-        this.gl = renderer.gl;
-        this._renderer = renderer;
-        this._buffer = this.gl.createFramebuffer();
-        this._types = {
+        this.#context = renderer.context;
+        this.#renderer = renderer;
+        this.#buffer = this.#context.createFramebuffer();
+        this.#types = {
             color: {
-                texture: this.gl.createTexture(),
+                texture: this.#context.createTexture(),
                 index: 0,
-                component: this.gl.RGBA8,
-                attachment: this.gl.COLOR_ATTACHMENT0,
+                component: this.#context.RGBA8,
+                attachment: this.#context.COLOR_ATTACHMENT0,
             },
             depth: {
-                texture: this.gl.createTexture(),
+                texture: this.#context.createTexture(),
                 index: 1,
-                component: this.gl.DEPTH_COMPONENT16,
-                attachment: this.gl.DEPTH_ATTACHMENT,
+                component: this.#context.DEPTH_COMPONENT16,
+                attachment: this.#context.DEPTH_ATTACHMENT,
             },
         };
 
-        this._renderer.on({
-            resized: () => Object.keys(this._types).forEach(k => this.buffer(k)),
+        this.#renderer.on({
+            resized: () => Object.keys(this.#types).forEach(k => this.buffer(k)),
         });
 
-        Object.keys(this._types).forEach(k => this.buffer(k));
+        Object.keys(this.#types).forEach(k => this.buffer(k));
     }
 
     record(callback)
     {
-        this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this._buffer);
+        this.#context.bindFramebuffer(this.#context.FRAMEBUFFER, this.#buffer);
 
-        this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
+        this.#context.clear(this.#context.COLOR_BUFFER_BIT | this.#context.DEPTH_BUFFER_BIT);
 
         callback();
 
-        this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
+        this.#context.bindFramebuffer(this.#context.FRAMEBUFFER, null);
     }
 
     buffer(name, bind = true)
     {
-        if(Object.keys(this._types).includes(name) !== true)
+        if(Object.keys(this.#types).includes(name) !== true)
         {
             throw new Error(`Can't buffer an unknown type (${name})`);
         }
 
-        const { index, component, attachment } = this._types[name];
-        const { width, height } = this._renderer;
-        const texture = this.gl.createTexture();
+        const { index, component, attachment } = this.#types[name];
+        const { width, height } = this.#renderer;
+        const texture = this.#context.createTexture();
 
         if(bind === true)
         {
-            this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this._buffer);
+            this.#context.bindFramebuffer(this.#context.FRAMEBUFFER, this.#buffer);
         }
-        this.gl.activeTexture(this.gl[`TEXTURE${index}`]);
+        this.#context.activeTexture(this.#context[`TEXTURE${index}`]);
 
-        this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
-        this.gl.pixelStorei(this.gl.UNPACK_FLIP_Y_WEBGL, false);
-        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
-        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);
-        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.gl.CLAMP_TO_EDGE);
-        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.CLAMP_TO_EDGE);
-        this.gl.texStorage2D(this.gl.TEXTURE_2D, 1, component, width, height);
-        this.gl.framebufferTexture2D(this.gl.FRAMEBUFFER, attachment, this.gl.TEXTURE_2D, texture, 0);
+        this.#context.bindTexture(this.#context.TEXTURE_2D, texture);
+        this.#context.pixelStorei(this.#context.UNPACK_FLIP_Y_WEBGL, false);
+        this.#context.texParameteri(this.#context.TEXTURE_2D, this.#context.TEXTURE_MAG_FILTER, this.#context.NEAREST);
+        this.#context.texParameteri(this.#context.TEXTURE_2D, this.#context.TEXTURE_MIN_FILTER, this.#context.NEAREST);
+        this.#context.texParameteri(this.#context.TEXTURE_2D, this.#context.TEXTURE_WRAP_S, this.#context.CLAMP_TO_EDGE);
+        this.#context.texParameteri(this.#context.TEXTURE_2D, this.#context.TEXTURE_WRAP_T, this.#context.CLAMP_TO_EDGE);
+        this.#context.texStorage2D(this.#context.TEXTURE_2D, 1, component, width, height);
+        this.#context.framebufferTexture2D(this.#context.FRAMEBUFFER, attachment, this.#context.TEXTURE_2D, texture, 0);
 
         if(bind === true)
         {
-            this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
+            this.#context.bindFramebuffer(this.#context.FRAMEBUFFER, null);
         }
 
-        this._types[name].texture = texture;
+        this.#types[name].texture = texture;
     }
 }

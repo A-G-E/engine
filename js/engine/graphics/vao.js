@@ -2,14 +2,19 @@ import Buffer from './buffer.js';
 
 export default class Vao
 {
-    constructor(renderer, attributes, vertices = null, indices = null)
+    #context;
+    #vao;
+    #attributes;
+    #vertices;
+    #indices;
+
+    constructor(context, attributes, vertices = null, indices = null)
     {
-        this.gl = renderer.gl;
-        this._renderer = renderer;
-        this._vao = renderer.gl.createVertexArray();
-        this._attributes = attributes;
-        this._vertices = null;
-        this._indices = null;
+        this.#context = context;
+        this.#vao = context.createVertexArray();
+        this.#attributes = attributes;
+        this.#vertices = null;
+        this.#indices = null;
 
         if(vertices !== null)
         {
@@ -22,39 +27,39 @@ export default class Vao
         }
     }
 
-    draw(type = this.gl.LINES)
+    draw(type = this.#context.LINES)
     {
-        if(this._vertices === null)
+        if(this.#vertices === null)
         {
             return this;
         }
 
-        this.gl.bindVertexArray(this._vao);
+        this.#context.bindVertexArray(this.#vao);
 
-        if(this._indices !== null)
+        if(this.#indices !== null)
         {
-            this.gl.drawElements(type, this._indices.length, this.gl.UNSIGNED_SHORT, 0);
+            this.#context.drawElements(type, this.#indices.length, this.#context.UNSIGNED_SHORT, 0);
         }
         else
         {
-            this.gl.drawArrays(type, 0, this._vertices.length);
+            this.#context.drawArrays(type, 0, this.#vertices.length);
         }
 
-        this.gl.bindVertexArray(null);
+        this.#context.bindVertexArray(null);
 
         return this;
     }
 
     bind()
     {
-        this.gl.bindVertexArray(this._vao);
+        this.#context.bindVertexArray(this.#vao);
 
         return this;
     }
 
     unbind()
     {
-        this.gl.bindVertexArray(null);
+        this.#context.bindVertexArray(null);
 
         return this;
     }
@@ -63,7 +68,7 @@ export default class Vao
     {
         this.bind();
 
-        this._vertices = new Buffer(this._renderer, this._attributes, new Float32Array(v));
+        this.#vertices = new Buffer(this.#context, this.#attributes, new Float32Array(v));
 
         this.unbind();
     }
@@ -72,11 +77,11 @@ export default class Vao
     {
         this.bind();
 
-        this._indices = new Buffer(
-            this._renderer,
+        this.#indices = new Buffer(
+            this.#context,
             [],
             new Uint16Array(i),
-            this._renderer.gl.ELEMENT_ARRAY_BUFFER
+            this.#context.ELEMENT_ARRAY_BUFFER
         );
 
         this.unbind();

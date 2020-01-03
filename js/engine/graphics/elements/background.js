@@ -3,9 +3,9 @@ import Vector2 from '../../../math/vector2.js';
 
 export default class Background extends Texture
 {
-    constructor(renderer, key)
+    constructor(context, key)
     {
-        super(renderer, key);
+        super(context, key);
 
         this._blinkInterval = null;
     }

@@ -29,9 +29,9 @@ const f = `#version 300 es
 
 export default class Quad extends Renderable
 {
-    constructor(renderer)
+    constructor(context)
     {
-        super(renderer, v, f, [
+        super(context, v, f, [
             -1, -1,
              1, -1,
             -1,  1,

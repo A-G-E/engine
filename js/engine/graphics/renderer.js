@@ -1,82 +1,70 @@
-import Quad from './elements/quad.js';
-import Fbo from './fbo.js';
-import Renderable from './renderable.js';
-import { Matrix4, Vector2 } from '../../math/exports.js';
+import * as Types from '/node_modules/@fyn-software/data/types.js';
+import { Vector2 } from '/js/math/exports.js';
+import Matrix4 from '/js/math/matrix4.js';
+import Fbo from '/js/engine/graphics/fbo.js';
+import Quad from '/js/engine/graphics/elements/quad.js';
+import Renderable from '/js/engine/graphics/renderable.js';
 
 const FOV = 90 * Math.PI / 180;
 const clip = {
     near: 0.1,
     far: 1000.0,
 };
+export const State = Types.Enum.define({
+    playing: { label: 'playing' },
+    paused: { label: 'paused' },
+    stopped: { label: 'stopped' },
+});
 
 export default class Renderer extends EventTarget
 {
-    constructor(owner)
+    #owner;
+    #canvas;
+    #context;
+    #projection = Matrix4.perspective(FOV, 1, clip.near, clip.far);
+    #state = State.stopped;
+    #stack = [];
+    #program = null;
+    #frameBuffer;
+    #quad;
+
+    constructor(owner, canvas)
     {
         super();
 
-        const canvas = document.createElement('canvas');
-        canvas.style.position = 'absolute';
-        canvas.style.top = 0;
+        this.#context = canvas.getContext('webgl2');
+        this.#context.clearColor(.2, .2, .2, 1);
+        this.#context.enable(this.#context.DEPTH_TEST);
+        this.#context.enable(this.#context.CULL_FACE);
+        this.#context.frontFace(this.#context.CCW);
+        this.#context.cullFace(this.#context.BACK);
+        this.#context.depthFunc(this.#context.LEQUAL);
+        this.#context.blendFunc(this.#context.SRC_ALPHA, this.#context.ONE_MINUS_SRC_ALPHA);
 
-        const context = canvas.getContext('webgl2');
-        context.clearColor(.2, .2, .2, 1);
-        context.enable(context.DEPTH_TEST);
-        context.enable(context.CULL_FACE);
-        context.frontFace(context.CCW);
-        context.cullFace(context.BACK);
-        context.depthFunc(context.LEQUAL);
-        context.blendFunc(context.SRC_ALPHA, context.ONE_MINUS_SRC_ALPHA);
 
-        this._owner = owner;
-        this._canvas = canvas;
-        this._context = context;
-        this._program = null;
-        this._playState = Renderer.stopped;
-        this._stack = [];
-        this._projection = Matrix4.perspective(FOV, 1, clip.near, clip.far);
-        this._frameBuffer = new Fbo(this);
-        this._quad = new Quad(this);
-
-        const observer = new ResizeObserver(([ e ]) =>
-        {
-            const old = { w: this._canvas.width, h: this._canvas.height };
-            const w = e.contentRect.width;
-            const h = e.contentRect.height;
-
-            this._canvas.width = w;
-            this._canvas.height = h;
-
-            this._context.viewport(0, 0, w, h);
-            this._projection = Matrix4.perspective(FOV, w / h, clip.near, clip.far);
-
-            this.emit('resized', { old, new: { w: this._canvas.width, h: this._canvas.height } });
-        });
-
-        observer.observe(this._owner);
+        this.#owner = owner;
+        this.#canvas = canvas;
+        this.#frameBuffer = new Fbo(this);
+        this.#quad = new Quad(this.#context);
     }
 
-    play()
+    resize(w, h)
     {
-        this._playState = Renderer.playing;
-        this.loop();
-    }
+        const old = { w: this.#canvas.width, h: this.#canvas.height };
 
-    pause()
-    {
-        this._playState = Renderer.paused;
-    }
+        this.#context.viewport(0, 0, w, h);
+        this.#projection = Matrix4.perspective(FOV, w / h, clip.near, clip.far);
 
-    stop()
-    {
-        this._playState = Renderer.stopped;
-        this._canvas.style.zIndex = 1;
+        this.#canvas.width = w;
+        this.#canvas.height = h;
+
+        this.emit('resized', { old, new: { w: this.#canvas.width, h: this.#canvas.height } });
     }
 
     loop()
     {
-        this._frameBuffer.record(() => {
-            for(let item of this._stack)
+        this.#frameBuffer.record(() => {
+            for(const item of this.#stack)
             {
                 item.preRender(this);
                 item.render(this);
@@ -84,13 +72,33 @@ export default class Renderer extends EventTarget
             }
         });
 
-        this._quad.preRender(this);
-        this._quad.render(this);
+        this.#quad.preRender(this);
+        this.#quad.render(this);
 
-        if(this._playState === Renderer.playing)
+        this.#context.commit();
+
+        if(this.#state === State.playing)
         {
-            window.requestAnimationFrame(() => this.loop());
+            requestAnimationFrame(() => this.loop());
         }
+    }
+
+    play()
+    {
+        this.#state = State.playing;
+
+        this.loop();
+    }
+
+    pause()
+    {
+        this.#state = State.paused;
+    }
+
+    async stop()
+    {
+        this.#state = State.stopped;
+        this.#canvas.style.zIndex = 1;
     }
 
     add(element)
@@ -100,27 +108,22 @@ export default class Renderer extends EventTarget
             throw new Error('Renderer.add expected an Renderable, got something else');
         }
 
-        this._stack.push(element);
+        this.#stack.push(element);
     }
 
     get canvas()
     {
-        return this._canvas;
-    }
-
-    get projection()
-    {
-        return this._projection;
+        return this.#canvas;
     }
 
     get width()
     {
-        return this._canvas.width;
+        return this.#canvas.width;
     }
 
     get height()
     {
-        return this._canvas.height;
+        return this.#canvas.height;
     }
 
     get size()
@@ -128,35 +131,24 @@ export default class Renderer extends EventTarget
         return new Vector2(this.width, this.height);
     }
 
-    get gl()
+    get context()
     {
-        return this._context;
+        return this.#context;
+    }
+
+    get projection()
+    {
+        return this.#projection;
     }
 
     get program()
     {
-        return this._program;
+        return this.#program;
     }
 
     set program(p)
     {
-        this._program = p;
-
-        this._context.useProgram(p.program);
-    }
-
-    static get playing()
-    {
-        return 'playing';
-    }
-
-    static get paused()
-    {
-        return 'paused';
-    }
-
-    static get stopped()
-    {
-        return 'stopped';
+        this.#program = p;
+        this.#context.useProgram(p.program);
     }
 }

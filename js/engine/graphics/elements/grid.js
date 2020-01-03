@@ -3,7 +3,7 @@ import { Matrix4 } from '../../../math/exports.js';
 
 export default class Grid extends Renderable
 {
-    constructor(renderer)
+    constructor(context)
     {
         const v = `#version 300 es
         
@@ -41,7 +41,7 @@ export default class Grid extends Renderable
             }
         `;
 
-        super(renderer, v, f);
+        super(context, v, f);
 
         let buffer = [];
 
@@ -54,10 +54,10 @@ export default class Grid extends Renderable
             let p = i * distance;
 
             buffer.push(
-                 p, 0,  t, .8, .8, .8,      p, 0, -t, .8, .8, .8, // +z -> -z :: +x
-                -p, 0,  t, .8, .8, .8,     -p, 0, -t, .8, .8, .8, // +z -> -z :: -x
-                 t, 0,  p, .8, .8, .8,     -t, 0,  p, .8, .8, .8, // +x -> -x :: +z
-                 t, 0, -p, .8, .8, .8,     -t, 0, -p, .8, .8, .8, // +x -> -x :: -z
+                 p, 0,  t, .8, .8, .8,      p, 0, -t, .4, .4, .4, // +z -> -z :: +x
+                -p, 0,  t, .8, .8, .8,     -p, 0, -t, .4, .4, .4, // +z -> -z :: -x
+                 t, 0,  p, .8, .8, .8,     -t, 0,  p, .4, .4, .4, // +x -> -x :: +z
+                 t, 0, -p, .8, .8, .8,     -t, 0, -p, .4, .4, .4, // +x -> -x :: -z
             );
         }
 

@@ -2,8 +2,8 @@ import Shader from '../shader.js';
 
 export default class Fragment extends Shader
 {
-    constructor(renderer, path)
+    constructor(context, path)
     {
-        super(renderer, renderer.gl.FRAGMENT_SHADER, path);
+        super(context, context.FRAGMENT_SHADER, path);
     }
 }

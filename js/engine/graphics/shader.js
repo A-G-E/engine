@@ -1,17 +1,21 @@
 export default class Shader
 {
-    constructor(renderer, type, src)
+    #context;
+    #src;
+    #shader;
+
+    constructor(context, type, src)
     {
-        this.gl = renderer.gl;
-        this._src = src;
-        this._shader = this.gl.createShader(type);
+        this.#context = context;
+        this.#src = src;
+        this.#shader = context.createShader(type);
 
-        this.gl.shaderSource(this._shader, src);
-        this.gl.compileShader(this._shader);
+        this.#context.shaderSource(this.#shader, src);
+        this.#context.compileShader(this.#shader);
 
-        if(!this.gl.getShaderParameter(this._shader, this.gl.COMPILE_STATUS))
+        if(!this.#context.getShaderParameter(this.#shader, this.#context.COMPILE_STATUS))
         {
-            console.log(this.gl.getShaderInfoLog(this._shader));
+            console.log(this.#context.getShaderInfoLog(this.#shader));
 
             this.delete();
 
@@ -21,16 +25,16 @@ export default class Shader
 
     delete()
     {
-        this.gl.deleteShader(this._shader);
+        this.#context.deleteShader(this.#shader);
     }
 
     get src()
     {
-        return this._src;
+        return this.#src;
     }
 
     get shader()
     {
-        return this._shader;
+        return this.#shader;
     }
 }

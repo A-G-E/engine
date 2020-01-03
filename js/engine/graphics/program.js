@@ -18,26 +18,30 @@ const typeSize = {
 
 export default class Program
 {
-    constructor(renderer, ...shaders)
+    #context;
+    #program;
+    #variables;
+    
+    constructor(context, ...shaders)
     {
-        this.gl = renderer.gl;
-        this._program = this.gl.createProgram();
-        this._variables = {};
+        this.#context = context;
+        this.#program = context.createProgram();
+        this.#variables = {};
 
         shaders.forEach(s => this.attach(s));
 
-        this.gl.linkProgram(this._program);
+        this.#context.linkProgram(this.#program);
 
-        if(this.gl.getProgramParameter(this._program, this.gl.LINK_STATUS) === false)
+        if(this.#context.getProgramParameter(this.#program, this.#context.LINK_STATUS) === false)
         {
-            console.log(this.gl.getProgramInfoLog(this._program));
+            console.log(this.#context.getProgramInfoLog(this.#program));
 
             throw new Error('linking the shader-program has failed');
         }
 
-        this.gl.validateProgram(this._program);
+        this.#context.validateProgram(this.#program);
 
-        if(this.gl.getProgramParameter(this._program, this.gl.VALIDATE_STATUS) === false)
+        if(this.#context.getProgramParameter(this.#program, this.#context.VALIDATE_STATUS) === false)
         {
             throw new Error('validating the shader-program has failed');
         }
@@ -69,9 +73,9 @@ export default class Program
 
         for(let block of blocks)
         {
-            this.gl.uniformBlockBinding(
-                this._program,
-                this.gl.getUniformBlockIndex(this._program, block),
+            this.#context.uniformBlockBinding(
+                this.#program,
+                this.#context.getUniformBlockIndex(this.#program, block),
                 Ubo.get(block).index
             );
         }
@@ -93,7 +97,7 @@ export default class Program
                     break;
             }
 
-            this._variables[name] = [ f, type, this[`get${f}Location`](name), typeSize[type] ];
+            this.#variables[name] = [ f, type, this[`get${f}Location`](name), typeSize[type] ];
         }
 
         const self = this;
@@ -103,11 +107,13 @@ export default class Program
             {
                 if(p in self)
                 {
-                    return self[p];
+                    return typeof self[p] === 'function'
+                        ? self[p].bind(self)
+                        : self[p];
                 }
 
-                return self._variables.hasOwnProperty(p)
-                    ? self._variables[p][2]
+                return self.#variables.hasOwnProperty(p)
+                    ? self.#variables[p][2]
                     : undefined;
             },
             set: (c, p, v) =>
@@ -119,14 +125,14 @@ export default class Program
                     return true;
                 }
 
-                if(!self._variables.hasOwnProperty(p))
+                if(!self.#variables.hasOwnProperty(p))
                 {
                     return false;
                 }
 
-                let [ modifier, type, location ] = self._variables[p];
+                let [ modifier, type, location ] = self.#variables[p];
 
-                self.gl.useProgram(self._program);
+                self.#context.useProgram(self.#program);
 
                 switch(modifier)
                 {
@@ -155,7 +161,7 @@ export default class Program
                             s = `uniform${t}${type.match(/[0-9]/)}fv`;
                         }
 
-                        self.gl[s](...a);
+                        self.#context[s](...a);
 
                         return true;
 
@@ -163,7 +169,7 @@ export default class Program
                         return false;
                 }
             },
-            has: (c, p) => self._variables.hasOwnProperty(p),
+            has: (c, p) => self.#variables.hasOwnProperty(p),
         });
     }
 
@@ -179,36 +185,36 @@ export default class Program
             throw new Error(`Expected instance of Shader, got ${shader.constructor.name}`);
         }
 
-        this.gl.attachShader(this._program, shader.shader);
+        this.#context.attachShader(this.#program, shader.shader);
     }
 
     use()
     {
-        this.gl.useProgram(this.program);
+        this.#context.useProgram(this.#program);
     }
 
     getAttributeLocation(loc)
     {
-        return this.gl.getAttribLocation(this._program, loc);
+        return this.#context.getAttribLocation(this.#program, loc);
     }
 
     getUniformLocation(loc)
     {
-        return this.gl.getUniformLocation(this._program, loc);
+        return this.#context.getUniformLocation(this.#program, loc);
     }
 
     get program()
     {
-        return this._program;
+        return this.#program;
     }
 
     get attributes()
     {
-        return Object.values(this._variables).filter(v => v[0] === 'Attribute').map(v => v.slice(2));
+        return Object.values(this.#variables).filter(v => v[0] === 'Attribute').map(v => v.slice(2));
     }
 
     get uniforms()
     {
-        return Object.values(this._variables).filter(v => v[0] === 'Uniform').map(v => v.slice(2));
+        return Object.values(this.#variables).filter(v => v[0] === 'Uniform').map(v => v.slice(2));
     }
 }

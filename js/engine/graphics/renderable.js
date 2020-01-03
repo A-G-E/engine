@@ -5,15 +5,14 @@ import Fragment from './shaders/fragment.js';
 
 export default class Renderable
 {
-    constructor(renderer, v, f, vertices = null, indices = null)
+    constructor(context, v, f, vertices = null, indices = null)
     {
-        this.renderer = renderer;
         this.program = new Program(
-            renderer,
-            new Vertex(renderer, v),
-            new Fragment(renderer, f)
+            context,
+            new Vertex(context, v),
+            new Fragment(context, f)
         );
-        this.vao = new Vao(renderer, this.program.attributes, vertices, indices);
+        this.vao = new Vao(context, this.program.attributes, vertices, indices);
     }
 
     preRender(renderer)
@@ -23,7 +22,7 @@ export default class Renderable
 
     render(renderer)
     {
-        this.vao.draw(renderer.gl.TRIANGLES);
+        this.vao.draw(renderer.context.TRIANGLES);
     }
 
     postRender(renderer)
