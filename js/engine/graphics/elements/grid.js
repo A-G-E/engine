@@ -51,13 +51,14 @@ export default class Grid extends Renderable
 
         for(let i = 0; i < size; i++)
         {
-            let p = i * distance;
+            const p = i * distance;
+            const v = i % 10 === 0 ? .6 : .4;
 
             buffer.push(
-                 p, 0,  t, .8, .8, .8,      p, 0, -t, .4, .4, .4, // +z -> -z :: +x
-                -p, 0,  t, .8, .8, .8,     -p, 0, -t, .4, .4, .4, // +z -> -z :: -x
-                 t, 0,  p, .8, .8, .8,     -t, 0,  p, .4, .4, .4, // +x -> -x :: +z
-                 t, 0, -p, .8, .8, .8,     -t, 0, -p, .4, .4, .4, // +x -> -x :: -z
+                 p, 0,  t, v, v, v,      p, 0, -t, v, v, v, // +z -> -z :: +x
+                -p, 0,  t, v, v, v,     -p, 0, -t, v, v, v, // +z -> -z :: -x
+                 t, 0,  p, v, v, v,     -t, 0,  p, v, v, v, // +x -> -x :: +z
+                 t, 0, -p, v, v, v,     -t, 0, -p, v, v, v, // +x -> -x :: -z
             );
         }
 

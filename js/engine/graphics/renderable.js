@@ -5,27 +5,57 @@ import Fragment from './shaders/fragment.js';
 
 export default class Renderable
 {
+    #context;
+    #program;
+    #vao;
+
     constructor(context, v, f, vertices = null, indices = null)
     {
-        this.program = new Program(
+        this.#context = context;
+        this.#program = new Program(
             context,
             new Vertex(context, v),
             new Fragment(context, f)
         );
-        this.vao = new Vao(context, this.program.attributes, vertices, indices);
+        this.#vao = new Vao(context, this.#program.attributes, vertices, indices);
     }
 
     preRender(renderer)
     {
-        this.program.use();
+        this.#program.use();
     }
 
     render(renderer)
     {
-        this.vao.draw(renderer.context.TRIANGLES);
+        this.#vao.draw(renderer.context.TRIANGLES);
     }
 
     postRender(renderer)
     {
+    }
+
+    get context()
+    {
+        return this.#context;
+    }
+
+    get program()
+    {
+        return this.#program;
+    }
+
+    get vao()
+    {
+        return this.#vao;
+    }
+
+    set vertices(v)
+    {
+        this.#vao.vertices = v;
+    }
+
+    set indices(i)
+    {
+        this.#vao.indices = i;
     }
 }

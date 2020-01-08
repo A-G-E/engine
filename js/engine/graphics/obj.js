@@ -102,15 +102,4 @@ export default class Obj extends Renderable
 
         super(context, v, f, buffer, indices);
     }
-
-    render(renderer)
-    {
-        this.program.world = Matrix4.identity
-            .translate(new Vector3(5, 1.5, 0))
-            .rotate(11.25 * Math.sin(performance.now() * .0025), new Vector3(1, 0, 0))
-            .translate(new Vector3(0, .6, .3))
-            .points;
-
-        super.render(renderer);
-    }
 }

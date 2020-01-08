@@ -5,6 +5,7 @@ import Obj from './graphics/obj.js';
 import Ubo from './graphics/ubo.js';
 import Grid from './graphics/elements/grid.js';
 import Bone from './graphics/elements/bone.js';
+import Gltf from './graphics/gltf.js';
 
 export default class Game extends EventTarget
 {
@@ -18,9 +19,9 @@ export default class Game extends EventTarget
         this.#renderer = new Renderer(this, canvas);
         this.#camera = new Ubo(this.#renderer.context, 'camera', {
             view: Matrix4.lookAt(
-                new Vector3(15, 4, 15),
-                new Vector3(0, 0, 0),
-                new Vector3(0, 1, 0)
+                new Vector3(1, 1.25, 1.25), // Camara position
+                new Vector3(0, 1, 0),       // Position to loot at
+                new Vector3(0, 1, 0)        // ?????
             ),
             projection: this.#renderer.projection,
         });
@@ -39,28 +40,43 @@ export default class Game extends EventTarget
             resized: () => this.#camera.projection = this.#renderer.projection,
         });
 
-        const t = await fetch('../../monkey.obj').then(r => r.text());
+        const bones = Array.from(Array(150), i => new Bone(this.#renderer.context, 1));
+        const susan = new Obj(this.#renderer.context, await fetch('/assets/monkey.obj').then(r => r.text()));
+        susan.program.world = Matrix4.identity
+            .translate(new Vector3(5, 1.5, 0))
+            .rotate(25 * Math.sin(performance.now() * .0025), new Vector3(1, 0, 0))
+            .translate(new Vector3(0, .6, .3))
+            .points;
 
-        const bones = Array.from(Array(10), i => new Bone(this.#renderer.context, Math.round(3 + 2 * Math.random())));
+        const vegeta = new Gltf(this.#renderer.context, '/assets/vegeta');
+        vegeta.program.world = Matrix4.identity.points;
 
         const draw = () => {
             const r = performance.now() * .00025;
-            const d = 15;
+            const d = 1.25;
 
             this.#camera.view = Matrix4.lookAt(
-                new Vector3(d * Math.cos(r), 14 + (Math.sin(r) * 2), d * Math.sin(r)),
-                new Vector3(0, 0, 0),
+                new Vector3(d * Math.cos(r), d + (.2 * Math.sin(r)), d * Math.sin(r)),
+                new Vector3(0, 1, 0),
                 new Vector3(0, 1, 0)
             );
 
-            let m = Matrix4.identity.rotate(22.5 * Math.sin(performance.now() * .0025), new Vector3(1, 0, 0));
+            susan.program.world = Matrix4.identity
+                .translate(new Vector3(5, 1.5, 0))
+                .rotate(25 * Math.sin(r * .0025), new Vector3(1, 0, 0))
+                .translate(new Vector3(0, .6, .3))
+                .points;
+
+            let m = Matrix4.identity.translate(new Vector3(-4, 0, 0));
+            const modifier = Math.sin(performance.now() * .0005);
+            const translation = new Vector3(0, 1, 0);
 
             for(const bone of bones)
             {
                 bone.world = m;
 
-                m = m.translate(new Vector3(0, bone.length, 0))
-                    .rotate(22.5 * Math.sin(performance.now() * .0025), new Vector3(1, 0, 0));
+                m = m.translate(translation)
+                    .rotate(60 * modifier, new Vector3(1, -Math.abs(.05 * modifier), 0));
             }
 
             requestAnimationFrame(draw);
@@ -69,7 +85,8 @@ export default class Game extends EventTarget
 
         this.#renderer.add(new Grid(this.#renderer.context));
         bones.forEach(b => this.#renderer.add(b));
-        this.#renderer.add(new Obj(this.#renderer.context, t));
+        this.#renderer.add(susan);
+        this.#renderer.add(vegeta);
         this.#renderer.play();
     }
 
