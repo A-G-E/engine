@@ -74,15 +74,16 @@ export default class Grid extends Renderable
         }
 
         vertex.push(
-            t, 0.007, 0, // +x -> -x
-            0,     t, 0, // +y -> -y
-            0, 0.007, t, // +z -> -z
+            t, 0.007, 0,    -t, 0.007,  0, // +x -> -x
+            0,     t, 0,     0,    -t,  0, // +y -> -y
+            0, 0.007, t,     0, 0.007, -t, // +z -> -z
         );
         color.push(
-            .8, .2, .2, // +x -> -x
-            .2, .2, .8, // +y -> -y
-            .2, .8, .2, // +z -> -z
+            .8, .2, .2,     .8, .2, .2, // +x -> -x
+            .2, .2, .8,     .2, .2, .8, // +y -> -y
+            .2, .8, .2,     .2, .8, .2, // +z -> -z
         );
+
 
         this.vao.vertex = { dataView: new Float32Array(vertex) };
         this.vao.color = { dataView: new Float32Array(color) };
