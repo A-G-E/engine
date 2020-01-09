@@ -1,6 +1,5 @@
-import Renderable from './renderable.js';
-import { Matrix4, Vector3 } from '../../math/exports.js';
-import Vao from './vao.js';
+import Renderable from '../renderable.js';
+import Vao from '../vao.js';
 
 const v = `#version 300 es
     precision mediump float;
@@ -45,30 +44,23 @@ const f = `#version 300 es
 
 export default class Gltf extends Renderable
 {
-    static TYPE_BYTE			= 5120;     // Mode Constants for GLTF and WebGL are identical
-    static TYPE_UNSIGNED_BYTE	= 5121;     // https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/Constants
-    static TYPE_SHORT			= 5122;
-    static TYPE_UNSIGNED_SHORT	= 5123;
-    static TYPE_UNSIGNED_INT	= 5125;
-    static TYPE_FLOAT			= 5126;
-
-    static COMP_SCALAR			= 1;		// Component Length based on Type
-    static COMP_VEC2			= 2;
-    static COMP_VEC3			= 3;
-    static COMP_VEC4			= 4;
-    static COMP_MAT2			= 4;
-    static COMP_MAT3			= 9;
-    static COMP_MAT4			= 16;
-
-    static TARGET_ARY_BUF		= 34962;	// bufferview.target
-    static TARGET_ELM_ARY_BUF	= 34963;
-
     static componentToArrayTypeMap = {
-        [this.TYPE_FLOAT]: Float32Array,
-        [this.TYPE_SHORT]: Int16Array,
-        [this.TYPE_UNSIGNED_SHORT]: Uint16Array,
-        [this.TYPE_UNSIGNED_INT]: Uint32Array,
-        [this.TYPE_UNSIGNED_BYTE]: Uint8Array,
+        5120: Int8Array,    // Byte
+        5121: Uint8Array,   // Unsigned byte
+        5122: Int16Array,   // Short
+        5123: Uint16Array,  // Unsigned short
+        5124: Int32Array,   // Int
+        5125: Uint32Array,  // Unsigned int
+        5126: Float32Array, // Float
+    };
+    static componentLengthMap = {
+        SCALAR: 1,
+        VEC2: 2,
+        VEC3: 3,
+        VEC4: 4,
+        MAT2: 4,
+        MAT3: 9,
+        MAT4: 16,
     };
 
     #mesh;
@@ -78,7 +70,8 @@ export default class Gltf extends Renderable
 
     constructor(context, path)
     {
-        super(context, v, f);
+        super(context);
+        super.init(v, f);
 
         this.parse(path);
     }
@@ -93,11 +86,9 @@ export default class Gltf extends Renderable
             throw new Error('this class is only able to handle gltf 2.0 standard');
         }
 
-        console.log(content);
-
         const scene = content.scenes[content.scene];
 
-        const parseAccessor = (index) => {
+        const parseAccessor = index => {
             const accessor = content.accessors[index];
             const bufferView = content.bufferViews[accessor.bufferView];
 
@@ -118,9 +109,13 @@ export default class Gltf extends Renderable
                     accessor,
                     bufferView,
                     type,
-                    typeName: type.name.substring(0, type.name.length - 5),
+                    drawType: 'arrays',
                     offset: (accessor.byteOffset ?? 0) + (bufferView.byteOffset ?? 0),
-                    length: accessor.count * Gltf[`COMP_${accessor.type}`],
+                    length: bufferView.byteLength / type.BYTES_PER_ELEMENT,
+                    get dataView()
+                    {
+                        return new DataView(binary, this.offset, bufferView.byteLength);
+                    },
                     get data()
                     {
                         return new this.type(binary, this.offset, this.length);
@@ -143,6 +138,7 @@ export default class Gltf extends Renderable
                 if(primitive.hasOwnProperty('indices'))
                 {
                     primitive.indices = parseAccessor(primitive.indices);
+                    primitive.indices.drawType = 'elements';
                 }
 
                 for(const [ type, value ] of Object.entries(primitive.attributes))
@@ -152,36 +148,28 @@ export default class Gltf extends Renderable
 
                 delete primitive.attributes;
 
-                // const indices = primitive.indices.data;
-                // const buffer = new Float32Array(indices.length / 2);
-                // const position = primitive.position.data;
-                // const normal = primitive.normal.data;
-                //
-                // // console.log(position, normal);
-                //
-                // for(let i = 0; i < indices.length; i +=3)
-                // {
-                //     buffer[i + 0] = position[i];
-                //     buffer[i + 1] = position[i + 1];
-                //     buffer[i * 2] = position[i + 2];
-                //     buffer[i * 3] = normal[i];
-                //     buffer[i * 4] = normal[i + 1];
-                //     buffer[i * 5] = normal[i + 2];
-                // }
+                const buffer = new Float32Array(primitive.position.length * 2);
+                const position = primitive.position.data;
+                const normal = primitive.normal.data;
 
-                // primitive.vao = new Vao(this.context, this.program.attributes, buffer, indices);
-                primitive.vao = new Vao(this.context, this.program.attributes, primitive.position.data, primitive.indices.data);
+                for(let i = 0; i < buffer.length; i += 3)
+                {
+                    buffer[i * 2 + 0] = position[i + 0];
+                    buffer[i * 2 + 1] = position[i + 1];
+                    buffer[i * 2 + 2] = position[i + 2];
+                    buffer[i * 2 + 3] = normal[i + 0];
+                    buffer[i * 2 + 4] = normal[i + 1];
+                    buffer[i * 2 + 5] = normal[i + 2];
+                }
+
+                primitive.vao = new Vao(this.context, this.program);
+                primitive.vao.indices = primitive.indices.data;
+                primitive.vao.vertex = primitive.position;
+                primitive.vao.normal = primitive.normal;
 
                 this.#primitives.push(primitive);
-
-                console.log(primitive);
-
-                this.vertices = primitive.position.data;
-                this.indices = primitive.indices.data;
             }
         }
-
-        const node = content.nodes.find(n => n.name === 'Vegeta');
     }
 
     render(renderer)

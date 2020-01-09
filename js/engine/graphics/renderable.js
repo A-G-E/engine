@@ -9,15 +9,19 @@ export default class Renderable
     #program;
     #vao;
 
-    constructor(context, v, f, vertices = null, indices = null)
+    constructor(context)
     {
         this.#context = context;
+    }
+
+    init(vertexShaderSource, fragmentShaderSource)
+    {
         this.#program = new Program(
-            context,
-            new Vertex(context, v),
-            new Fragment(context, f)
+            this.#context,
+            new Vertex(this.#context, vertexShaderSource),
+            new Fragment(this.#context, fragmentShaderSource),
         );
-        this.#vao = new Vao(context, this.#program.attributes, vertices, indices);
+        this.#vao = new Vao(this.#context, this.#program);
     }
 
     preRender(renderer)

@@ -1,5 +1,5 @@
-import { Matrix4, Vector3 } from '../../math/exports.js';
-import Renderable from './renderable.js';
+import { Matrix4, Vector3 } from '../../../math/exports.js';
+import Renderable from '../renderable.js';
 
 const v = `#version 300 es
     precision mediump float;
@@ -42,10 +42,10 @@ const f = `#version 300 es
     }
 `;
 const parse = content => {
-    let vertices = [];
-    let UVs = [];
-    let normals = [];
-    let faces = [];
+    const vertices = [];
+    const UVs = [];
+    const normals = [];
+    const faces = [];
 
     for(const [type, ...args] of content.split('\n').map(l => l.split(' ')))
     {
@@ -76,10 +76,13 @@ export default class Obj extends Renderable
 {
     constructor(context, content)
     {
-        const [ vertices, UVs, normals, faces ] = parse(content);
+        super(context);
+        super.init(v, f);
 
-        let buffer = [];
+        const [ vertices, UVs, normals, faces ] = parse(content);
         let indices = [];
+        let vertex = [];
+        let normal = [];
         let i = 0;
 
         for(const set of faces)
@@ -87,19 +90,15 @@ export default class Obj extends Renderable
             for(const [ v, vt, vn ] of set)
             {
                 indices.push(i);
-                buffer.push(...vertices[v]);
-
-                if(Number.isNaN(vt) === false)
-                {
-                    buffer.push(...UVs[vt]);
-                }
-
-                buffer.push(...normals[vn]);
+                vertex.push(...vertices[v]);
+                normal.push(...normals[vn]);
 
                 i++;
             }
         }
 
-        super(context, v, f, buffer, indices);
+        this.vao.indices = indices;
+        this.vao.vertex = { dataView: new Float32Array(vertex) };
+        this.vao.normal = { dataView: new Float32Array(normal) };
     }
 }

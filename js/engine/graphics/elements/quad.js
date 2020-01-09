@@ -31,15 +31,21 @@ export default class Quad extends Renderable
 {
     constructor(context)
     {
-        super(context, v, f, [
-            -1, -1,
-             1, -1,
-            -1,  1,
-             1,  1,
-        ], [
+        super(context);
+        super.init(v, f);
+
+        this.vao.indices = [
             0, 1, 2,
             1, 3, 2,
-        ]);
+        ];
+        this.vao.vertex = {
+            dataView: new Float32Array([
+                -1, -1,
+                 1, -1,
+                -1,  1,
+                 1,  1,
+            ]),
+        };
 
         this.program.tex = 0;
     }

@@ -1,11 +1,7 @@
 import Renderable from '../renderable.js';
 import { Matrix4 } from '../../../math/exports.js';
 
-export default class Grid extends Renderable
-{
-    constructor(context)
-    {
-        const v = `#version 300 es
+const v = `#version 300 es
         
             precision mediump float;
             
@@ -27,8 +23,7 @@ export default class Grid extends Renderable
                 gl_Position = projection * view * world * vec4(vertex, 1.0);
             }
         `;
-
-        const f = `#version 300 es
+const f = `#version 300 es
         
             precision mediump float;
             
@@ -41,9 +36,15 @@ export default class Grid extends Renderable
             }
         `;
 
-        super(context, v, f);
+export default class Grid extends Renderable
+{
+    constructor(context)
+    {
+        super(context);
+        super.init(v, f);
 
-        let buffer = [];
+        const vertex = [];
+        const color = [];
 
         const size = 100;
         const distance = .4;
@@ -54,21 +55,37 @@ export default class Grid extends Renderable
             const p = i * distance;
             const v = i % 10 === 0 ? .6 : .4;
 
-            buffer.push(
-                 p, 0,  t, v, v, v,      p, 0, -t, v, v, v, // +z -> -z :: +x
-                -p, 0,  t, v, v, v,     -p, 0, -t, v, v, v, // +z -> -z :: -x
-                 t, 0,  p, v, v, v,     -t, 0,  p, v, v, v, // +x -> -x :: +z
-                 t, 0, -p, v, v, v,     -t, 0, -p, v, v, v, // +x -> -x :: -z
+            vertex.push(
+                 p, 0,  t,      p, 0, -t, // +z -> -z :: +x
+                -p, 0,  t,     -p, 0, -t, // +z -> -z :: -x
+                 t, 0,  p,     -t, 0,  p, // +x -> -x :: +z
+                 t, 0, -p,     -t, 0, -p, // +x -> -x :: -z
+            );
+            color.push(
+                v, v, v,
+                v, v, v,
+                v, v, v,
+                v, v, v,
+                v, v, v,
+                v, v, v,
+                v, v, v,
+                v, v, v,
             );
         }
 
-        buffer.push(
-            t, 0.007, 0, .8, .2, .2,     -t, 0.007,  0, .8, .2, .2, // +x -> -x
-            0,     t, 0, .2, .2, .8,      0,    -t,  0, .2, .2, .8, // +y -> -y
-            0, 0.007, t, .2, .8, .2,      0, 0.007, -t, .2, .8, .2, // +z -> -z
+        vertex.push(
+            t, 0.007, 0, // +x -> -x
+            0,     t, 0, // +y -> -y
+            0, 0.007, t, // +z -> -z
+        );
+        color.push(
+            .8, .2, .2, // +x -> -x
+            .2, .2, .8, // +y -> -y
+            .2, .8, .2, // +z -> -z
         );
 
-        this.vao.vertices = buffer;
+        this.vao.vertex = { dataView: new Float32Array(vertex) };
+        this.vao.color = { dataView: new Float32Array(color) };
         this.program.world = Matrix4.identity.points;
     }
 

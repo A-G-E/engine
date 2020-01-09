@@ -1,11 +1,12 @@
 import * as Comlink from 'https://unpkg.com/comlink/dist/esm/comlink.mjs';
 import { Matrix4, Vector3 } from '../math/exports.js';
 import Renderer from './graphics/renderer.js';
-import Obj from './graphics/obj.js';
 import Ubo from './graphics/ubo.js';
+import Obj from './graphics/elements/obj.js';
 import Grid from './graphics/elements/grid.js';
 import Bone from './graphics/elements/bone.js';
-import Gltf from './graphics/gltf.js';
+import Gltf from './graphics/elements/gltf.js';
+import Terrain from './graphics/elements/terrain.js';
 
 export default class Game extends EventTarget
 {
@@ -42,17 +43,11 @@ export default class Game extends EventTarget
 
         const bones = Array.from(Array(150), i => new Bone(this.#renderer.context, 1));
         const susan = new Obj(this.#renderer.context, await fetch('/assets/monkey.obj').then(r => r.text()));
-        susan.program.world = Matrix4.identity
-            .translate(new Vector3(5, 1.5, 0))
-            .rotate(25 * Math.sin(performance.now() * .0025), new Vector3(1, 0, 0))
-            .translate(new Vector3(0, .6, .3))
-            .points;
-
         const vegeta = new Gltf(this.#renderer.context, '/assets/vegeta');
         vegeta.program.world = Matrix4.identity.points;
 
         const draw = () => {
-            const r = performance.now() * .00025;
+            const r = performance.now() * .0005;
             const d = 1.25;
 
             this.#camera.view = Matrix4.lookAt(
@@ -62,8 +57,9 @@ export default class Game extends EventTarget
             );
 
             susan.program.world = Matrix4.identity
-                .translate(new Vector3(5, 1.5, 0))
-                .rotate(25 * Math.sin(r * .0025), new Vector3(1, 0, 0))
+                .translate(new Vector3(2.5, 1.5, 0))
+                .scale(new Vector3(.5, .5, .5))
+                .rotate(25 * Math.sin(r * 5), new Vector3(1, 0, 0))
                 .translate(new Vector3(0, .6, .3))
                 .points;
 

@@ -4,45 +4,80 @@ export default class Vao
 {
     #context;
     #vao;
+    #program;
     #attributes;
-    #vertices;
-    #indices;
+    #buffers = [];
 
-    constructor(context, attributes, vertices = null, indices = null)
+    constructor(context, program, vertices = null, indices = null)
     {
         this.#context = context;
         this.#vao = context.createVertexArray();
-        this.#attributes = attributes;
-        this.#vertices = null;
-        this.#indices = null;
+        this.#program = program;
+        this.#attributes = program.attributes;
 
         if(vertices !== null)
         {
             this.vertices = vertices;
         }
-
         if(indices !== null)
         {
             this.indices = indices;
+        }
+
+        const define = (variable, key, size) => {
+            Object.defineProperty(this, variable, {
+                set: v => {
+                    this.bind();
+
+                    let buffer = this.#buffers.find(b => b.variable === variable);
+
+                    if(buffer === undefined)
+                    {
+                        buffer = {
+                            variable,
+                            buffer: new Buffer(this.#context, [ [ key, size ] ]),
+                            drawType: v.drawType ?? 'arrays',
+                        };
+
+                        this.#buffers.push(buffer);
+                    }
+
+                    buffer.buffer.data = v.dataView;
+
+                    this.unbind();
+                },
+            });
+        };
+
+        // define('indices');
+
+        for(const [ variable, [,, key, size ] ] of Object.entries(program.variables).filter(v => v[1][0] === 'Attribute'))
+        {
+            define(variable, key, size);
         }
     }
 
     draw(type = this.#context.LINES)
     {
-        if(this.#vertices === null)
+        if(this.#buffers.length === 0)
         {
             return this;
         }
 
         this.#context.bindVertexArray(this.#vao);
 
-        if(this.#indices !== null)
+        for(const buffer of this.#buffers)
         {
-            this.#context.drawElements(type, this.#indices.length, this.#context.UNSIGNED_SHORT, 0);
-        }
-        else
-        {
-            this.#context.drawArrays(type, 0, this.#vertices.length);
+            switch(buffer.drawType)
+            {
+                case 'elements':
+                    this.#context.drawElements(type, buffer.buffer.length, this.#context.UNSIGNED_SHORT, 0);
+                    break;
+
+                default:
+                    this.#context.drawArrays(type, 0, buffer.buffer.length);
+                    break;
+            }
         }
 
         this.#context.bindVertexArray(null);
@@ -68,7 +103,16 @@ export default class Vao
     {
         this.bind();
 
-        this.#vertices = new Buffer(this.#context, this.#attributes, new Float32Array(v));
+        if((v instanceof Float32Array) === false)
+        {
+            v = new Float32Array(v);
+        }
+
+        this.#buffers.push({
+            variable: 'vertices',
+            buffer: new Buffer(this.#context, this.#attributes, v),
+            drawType: 'arrays',
+        });
 
         this.unbind();
     }
@@ -77,12 +121,16 @@ export default class Vao
     {
         this.bind();
 
-        this.#indices = new Buffer(
-            this.#context,
-            [],
-            new Uint16Array(i),
-            this.#context.ELEMENT_ARRAY_BUFFER
-        );
+        if((i instanceof Uint16Array) === false)
+        {
+            i = new Uint16Array(i);
+        }
+
+        this.#buffers.push({
+            variable: 'indices',
+            buffer: new Buffer(this.#context, [], i, this.#context.ELEMENT_ARRAY_BUFFER),
+            drawType: 'elements',
+        });
 
         this.unbind();
     }

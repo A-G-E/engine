@@ -50,7 +50,7 @@ export default class Program
             .filter(s => s instanceof Vertex)
             .map(s => s.src
                 .split('\n')
-                .map(l => l.trim().match(/(in)\s+([a-z][a-zA-Z0-9]+)\s+([a-zA-Z0-9_]+);/))
+                .map(l => l.trim().match(/^ *(?<!\/\/ *)(in)\s+([a-z][a-zA-Z0-9]+)\s+([a-zA-Z0-9_]+);/))
                 .filter(l => l !== null)
             )
             .reduce((t, a) => [ ...t, ...a ], []);
@@ -65,13 +65,13 @@ export default class Program
 
         const matches = [...ins, ...uniforms];
 
-        let blocks = shaders
+        const blocks = shaders
             .map(s => s.src.match(/uniform\s+([a-z][a-z0-9]+)\s*{\s*[^}]+\s*}\s*([a-z][a-z0-9]+)?;/g))
             .filter(l => l !== null)
             .reduce((t, a) => [ ...t, ...a ], [])
             .map(m => m.match(/uniform\s+([a-z][a-z0-9]+)\s*{\s*[^}]+\s*}\s*([a-z][a-z0-9]+)?;/)[1]);
 
-        for(let block of blocks)
+        for(const block of blocks)
         {
             this.#context.uniformBlockBinding(
                 this.#program,
@@ -80,7 +80,7 @@ export default class Program
             );
         }
 
-        for(let [ , modifier, type, name ] of matches)
+        for(const [ , modifier, type, name ] of matches)
         {
             let f;
 
@@ -206,6 +206,11 @@ export default class Program
     get program()
     {
         return this.#program;
+    }
+
+    get variables()
+    {
+        return this.#variables;
     }
 
     get attributes()

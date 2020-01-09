@@ -47,14 +47,10 @@ export default class Bone extends Renderable
 {
     constructor(context, length)
     {
-        super(context, v, f, [
-              0,   0,   0,     0, -1,  0,
-             .1, .25,  .1,     0,  0, -1,
-            -.1, .25,  .1,     0, -1,  0,
-            -.1, .25, -.1,     0,  0,  1,
-             .1, .25, -.1,     0,  1,  0,
-              0,   1,   0,     0,  1,  0,
-        ], [
+        super(context);
+        super.init(v, f);
+
+        this.vao.indices = [
             0, 1, 2,
             0, 2, 3,
             0, 3, 4,
@@ -64,7 +60,23 @@ export default class Bone extends Renderable
             5, 4, 3,
             5, 3, 2,
             5, 2, 1,
-        ]);
+        ];
+        this.vao.vertex = { dataView: new Float32Array([
+                  0,   0,   0,
+                 .1, .25,  .1,
+                -.1, .25,  .1,
+                -.1, .25, -.1,
+                 .1, .25, -.1,
+                  0,   1,   0,
+            ]), drawType: 'arrays' };
+        this.vao.normal = { dataView: new Float32Array([
+                0, -1,  0,
+                0,  0, -1,
+                0, -1,  0,
+                0,  0,  1,
+                0,  1,  0,
+                0,  1,  0,
+            ]), drawType: 'arrays' };
 
         this.world = Matrix4.identity;
         this._length = length;

@@ -3,16 +3,15 @@ export default class Buffer
     #context;
     #type;
     #buffer;
-    #length;
+    #length = 0;
     #attributes;
     #data;
     
     constructor(context, attributes, data = [], type = null)
     {
         this.#context = context;
-        this.#type = type || context.ARRAY_BUFFER;
+        this.#type = type ?? context.ARRAY_BUFFER;
         this.#buffer = context.createBuffer();
-        this.#length = 0;
 
         this.attributes = attributes;
         this.data = data;
@@ -39,9 +38,9 @@ export default class Buffer
         this.#context.bindBuffer(this.#type, this.#buffer);
 
         let offset = 0;
-        let total = attributes.map(a => a[1]).sum;
+        const total = attributes.map(a => a[1]).sum;
 
-        for(let [ key, size ] of attributes)
+        for(const [ key, size ] of attributes)
         {
             this.#context.enableVertexAttribArray(key);
             this.#context.vertexAttribPointer(
@@ -59,6 +58,7 @@ export default class Buffer
 
     set data(data)
     {
+        this.#data = data;
         this.#context.bindBuffer(this.#type, this.#buffer);
         this.#context.bufferData(this.#type, data, this.#context.STATIC_DRAW);
 
@@ -67,7 +67,7 @@ export default class Buffer
 
     get length()
     {
-        let attributes = this.#attributes.filter(i => i[0] !== undefined);
+        const attributes = this.#attributes.filter(i => i[0] !== undefined);
 
         return this.#length / Math.max(1, attributes.map(a => a[1]).sum);
     }
