@@ -6,7 +6,6 @@ import Obj from './graphics/elements/obj.js';
 import Grid from './graphics/elements/grid.js';
 import Bone from './graphics/elements/bone.js';
 import Gltf from './graphics/elements/gltf.js';
-import Terrain from './graphics/elements/terrain.js';
 
 export default class Game extends EventTarget
 {
@@ -32,7 +31,7 @@ export default class Game extends EventTarget
 
     async ready()
     {
-        new Ubo(this.#renderer.context, 'lighting', {
+        const light = new Ubo(this.#renderer.context, 'lighting', {
             position: new Vector3(5.0, 3.0, 5.0),
             color: new Vector3(0.25, 0.25, 0.25),
         });
@@ -43,18 +42,28 @@ export default class Game extends EventTarget
 
         const bones = Array.from(Array(150), i => new Bone(this.#renderer.context, 1));
         const susan = new Obj(this.#renderer.context, await fetch('/assets/monkey.obj').then(r => r.text()));
-        const vegeta = new Gltf(this.#renderer.context, '/assets/vegeta');
+
+        const vegeta = new Gltf(this.#renderer.context, '/assets/', 'vegeta');
         vegeta.program.world = Matrix4.identity.points;
+        // vegeta.program.world = Matrix4.identity.translate(new Vector3(0, 0, -3)).points;
+
+        // const monster = new Gltf(this.#renderer.context, '/assets/', 'Monster');
+        // monster.program.world = Matrix4.identity.translate(new Vector3(.15, 0, -.25)).scale(new Vector3(.025)).rotate(-90, new Vector3(1, 0, 0)).points;
+
+        const d = 1.25;
+        let angle = 45;
 
         const draw = () => {
             const r = performance.now() * .0005;
-            const d = 1.25;
+
+            // angle = r;
 
             this.#camera.view = Matrix4.lookAt(
-                new Vector3(d * Math.cos(r), d + (.2 * Math.sin(r)), d * Math.sin(r)),
+                new Vector3(d * Math.sin(angle), d, d * Math.cos(angle)),
                 new Vector3(0, 1, 0),
                 new Vector3(0, 1, 0)
             );
+            light.position = new Vector3(d * Math.sin(angle), d, d * Math.cos(angle));
 
             susan.program.world = Matrix4.identity
                 .translate(new Vector3(2.5, 1.5, 0))
@@ -79,10 +88,38 @@ export default class Game extends EventTarget
         };
         draw();
 
+        let moving = false;
+        let start = null;
+        let startAngle = null;
+
+        this.on({
+            mouse: ({ buttons, position }) => {
+                moving = buttons[0] !== 0;
+
+                if(moving === false)
+                {
+                    start = null;
+
+                    return;
+                }
+
+                if(start === null)
+                {
+                    start = position;
+                    startAngle = angle;
+                }
+
+                const delta = (position[0] - start[0]) / 50;
+
+                angle = startAngle - delta;
+            },
+        });
+
         this.#renderer.add(new Grid(this.#renderer.context));
         bones.forEach(b => this.#renderer.add(b));
         this.#renderer.add(susan);
         this.#renderer.add(vegeta);
+        // this.#renderer.add(monster);
         this.#renderer.play();
     }
 

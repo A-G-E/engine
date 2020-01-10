@@ -34,10 +34,10 @@ export default class Quad extends Renderable
         super(context);
         super.init(v, f);
 
-        this.vao.indices = [
+        this.vao.indices = new Uint16Array([
             0, 1, 2,
             1, 3, 2,
-        ];
+        ]);
         this.vao.vertex = {
             dataView: new Float32Array([
                 -1, -1,

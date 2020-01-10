@@ -1,5 +1,6 @@
 import Renderable from '../renderable.js';
 import Vao from '../vao.js';
+import { Matrix4 } from '../../../math/exports.js';
 
 const v = `#version 300 es
     precision mediump float;
@@ -42,6 +43,16 @@ const f = `#version 300 es
     }
 `;
 
+const files = new Map();
+const download = async file => {
+    if(files.has(file) === false)
+    {
+        files.set(file, fetch(file).then(r => r.arrayBuffer()));
+    }
+
+    return files.get(file);
+};
+
 export default class Gltf extends Renderable
 {
     static componentToArrayTypeMap = {
@@ -52,6 +63,15 @@ export default class Gltf extends Renderable
         5124: Int32Array,   // Int
         5125: Uint32Array,  // Unsigned int
         5126: Float32Array, // Float
+    };
+    static componentToGetterMap = {
+        5120: 'getInt8',    // Byte
+        5121: 'getUint8',   // Unsigned byte
+        5122: 'getInt16',   // Short
+        5123: 'getUint16',  // Unsigned short
+        5124: 'getInt32',   // Int
+        5125: 'getUint32',  // Unsigned int
+        5126: 'getFloat32', // Float
     };
     static componentLengthMap = {
         SCALAR: 1,
@@ -68,18 +88,19 @@ export default class Gltf extends Renderable
     #armature;
     #primitives = [];
 
-    constructor(context, path)
+    baseMatrix = Matrix4.identity;
+
+    constructor(context, path, name)
     {
         super(context);
         super.init(v, f);
 
-        this.parse(path);
+        this.parse(path, name);
     }
 
-    async parse(path)
+    async parse(path, name)
     {
-        const content = await fetch(`${path}.gltf`).then(r => r.json());
-        const binary = await fetch(`${path}.bin`).then(r => r.arrayBuffer());
+        const content = await fetch(`${path}${name}.gltf`).then(r => r.json());
 
         if(content.asset.version !== '2.0')
         {
@@ -88,9 +109,15 @@ export default class Gltf extends Renderable
 
         const scene = content.scenes[content.scene];
 
-        const parseAccessor = index => {
+        console.log(content);
+
+        const parseAccessor = async index => {
             const accessor = content.accessors[index];
             const bufferView = content.bufferViews[accessor.bufferView];
+            const buffer = content.buffers[bufferView.buffer];
+
+            // TODO(Chris Kruining) Implement data url handling
+            const binary = await download(path + buffer.uri);
 
             if(Gltf.componentToArrayTypeMap.hasOwnProperty(accessor.componentType) === false)
             {
@@ -98,38 +125,65 @@ export default class Gltf extends Renderable
             }
 
             const type = Gltf.componentToArrayTypeMap[accessor.componentType];
+            const getter = Gltf.componentToGetterMap[accessor.componentType];
 
-            if(bufferView.hasOwnProperty('byteStride'))
-            {
-                throw new Error('Not implemented');
-            }
-            else
-            {
-                return {
-                    accessor,
-                    bufferView,
-                    type,
-                    drawType: 'arrays',
-                    offset: (accessor.byteOffset ?? 0) + (bufferView.byteOffset ?? 0),
-                    length: bufferView.byteLength / type.BYTES_PER_ELEMENT,
-                    get dataView()
+            return {
+                accessor,
+                bufferView,
+                type,
+                binary,
+                target: bufferView.target ?? this.context.ARRAY_BUFFER,
+                offset: (accessor.byteOffset ?? 0) + (bufferView.byteOffset ?? 0),
+                length: bufferView.byteLength / type.BYTES_PER_ELEMENT,
+                get dataView()
+                {
+                    if(bufferView.hasOwnProperty('byteStride') === false)
                     {
-                        return new DataView(binary, this.offset, bufferView.byteLength);
-                    },
-                    get data()
+                        return new DataView(this.binary, this.offset, bufferView.byteLength);
+                    }
+
+                    const array = new this.type(this.length);
+                    const bufferOffset = bufferView.byteOffset ?? 0;
+                    const strideOffset = accessor.byteOffset ?? 0;
+                    const dataView = new DataView(this.binary);
+                    let j, k = 0, p = 0;
+
+                    for(let i = 0; i < accessor.count; i++)
                     {
-                        return new this.type(binary, this.offset, this.length);
-                    },
-                };
-            }
+                        p = bufferOffset + (bufferView.byteStride * i) + strideOffset;
+
+                        for(j = 0; j < this.length; j++)
+                        {
+                            array[k++] = dataView[getter](p + (j * type.BYTES_PER_ELEMENT), true);
+                        }
+                    }
+
+                    return array;
+                },
+                get data()
+                {
+                    if(bufferView.hasOwnProperty('byteStride'))
+                    {
+                        return this.dataView;
+                    }
+
+                    return new type(this.binary, this.offset, this.length);
+                }
+            };
         };
 
         for(const index of scene.nodes)
         {
             const armature = content.nodes[index];
-            const node = content.nodes[armature.children[0]];
+            const node = content.nodes[armature.children.find(c => content.nodes[c].hasOwnProperty('mesh'))];
             const mesh = content.meshes[node.mesh];
             const skin = content.skins[node.skin];
+
+            if(node.hasOwnProperty('matrix'))
+            {
+                // TODO(Chris Kruining) Implement matrix interpretation
+                // this.baseMatrix = new Matrix4.fromColumnMajor(node.matrix);
+            }
 
             for(const primitive of mesh.primitives)
             {
@@ -137,30 +191,16 @@ export default class Gltf extends Renderable
 
                 if(primitive.hasOwnProperty('indices'))
                 {
-                    primitive.indices = parseAccessor(primitive.indices);
+                    primitive.indices = await parseAccessor(primitive.indices);
                     primitive.indices.drawType = 'elements';
                 }
 
                 for(const [ type, value ] of Object.entries(primitive.attributes))
                 {
-                    primitive[type.match(/^[a-z]+/i)[0].toLowerCase()] = parseAccessor(value);
+                    primitive[type.match(/^[a-z]+/i)[0].toLowerCase()] = await parseAccessor(value);
                 }
 
                 delete primitive.attributes;
-
-                const buffer = new Float32Array(primitive.position.length * 2);
-                const position = primitive.position.data;
-                const normal = primitive.normal.data;
-
-                for(let i = 0; i < buffer.length; i += 3)
-                {
-                    buffer[i * 2 + 0] = position[i + 0];
-                    buffer[i * 2 + 1] = position[i + 1];
-                    buffer[i * 2 + 2] = position[i + 2];
-                    buffer[i * 2 + 3] = normal[i + 0];
-                    buffer[i * 2 + 4] = normal[i + 1];
-                    buffer[i * 2 + 5] = normal[i + 2];
-                }
 
                 primitive.vao = new Vao(this.context, this.program);
                 primitive.vao.indices = primitive.indices.data;

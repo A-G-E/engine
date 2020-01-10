@@ -192,9 +192,30 @@ export default class Matrix4
         return new Matrix4([ x, 0, 0, 0, 0, y, 0, 0, 0, 0, z, 0, 0, 0, 0, 1 ]);
     }
 
+    static fromColumnMajor(points)
+    {
+        return new Matrix4([
+            points[0], points[4], points[ 8], points[12],
+            points[1], points[5], points[ 9], points[13],
+            points[2], points[6], points[10], points[14],
+            points[3], points[7], points[11], points[15],
+        ]);
+    }
+
     static get identity()
     {
-        return new Matrix4([ 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 ]);
+        return new Matrix4([
+            1, 0, 0, 0,
+            0, 1, 0, 0,
+            0, 0, 1, 0,
+            0, 0, 0, 1,
+        ]);
+        return new Matrix4([
+            1, 0, 0, 0,
+            0, 0, 1, 0,
+            0, -1, 0, 0,
+            0, 0, 0, 1,
+        ]);
     }
 
     static get epsilon()

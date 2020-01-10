@@ -36,7 +36,7 @@ export default class Vao
                         buffer = {
                             variable,
                             buffer: new Buffer(this.#context, [ [ key, size ] ]),
-                            drawType: v.drawType ?? 'arrays',
+                            target: v.target ?? this.#context.ARRAY_BUFFER,
                         };
 
                         this.#buffers.push(buffer);
@@ -68,13 +68,13 @@ export default class Vao
 
         for(const buffer of this.#buffers)
         {
-            switch(buffer.drawType)
+            switch(buffer.target)
             {
-                case 'elements':
+                case this.#context.ELEMENT_ARRAY_BUFFER:
                     this.#context.drawElements(type, buffer.buffer.length, this.#context.UNSIGNED_SHORT, 0);
                     break;
 
-                default:
+                case this.#context.ARRAY_BUFFER:
                     this.#context.drawArrays(type, 0, buffer.buffer.length);
                     break;
             }
@@ -101,27 +101,14 @@ export default class Vao
 
     set vertices(v)
     {
-        this.bind();
-
-        if((v instanceof Float32Array) === false)
-        {
-            v = new Float32Array(v);
-        }
-
-        this.#buffers.push({
-            variable: 'vertices',
-            buffer: new Buffer(this.#context, this.#attributes, v),
-            drawType: 'arrays',
-        });
-
-        this.unbind();
+        throw new Error('Obsolete');
     }
 
     set indices(i)
     {
         this.bind();
 
-        if((i instanceof Uint16Array) === false)
+        if((i instanceof Uint16Array) === false && (i instanceof DataView) === false)
         {
             i = new Uint16Array(i);
         }
@@ -129,7 +116,7 @@ export default class Vao
         this.#buffers.push({
             variable: 'indices',
             buffer: new Buffer(this.#context, [], i, this.#context.ELEMENT_ARRAY_BUFFER),
-            drawType: 'elements',
+            target: this.#context.ELEMENT_ARRAY_BUFFER,
         });
 
         this.unbind();
