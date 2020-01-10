@@ -63,7 +63,7 @@ export default class Game extends EventTarget
                 new Vector3(0, 1, 0),
                 new Vector3(0, 1, 0)
             );
-            light.position = new Vector3(d * Math.sin(angle), d, d * Math.cos(angle));
+            light.position = new Vector3(d * Math.sin(angle), d * 1.2, d * Math.cos(angle));
 
             susan.program.world = Matrix4.identity
                 .translate(new Vector3(2.5, 1.5, 0))
