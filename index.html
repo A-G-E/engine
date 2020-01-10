@@ -10,7 +10,8 @@
         <link rel="stylesheet" type="text/css" href="/node_modules/@fyn-software/suite/css/preload.css">
 
         <style>
-            cpb-editor {
+            cpb-editor,
+            cpb-voyage {
                 width: 100%;
                 height: 100%;
             }
@@ -18,17 +19,19 @@
     </head>
 
     <body>
-        <cpb-editor></cpb-editor>
+<!--        <cpb-editor></cpb-editor>-->
+        <cpb-voyage></cpb-voyage>
 
         <script type="module">
             import * as Fyn from '/node_modules/@fyn-software/component/fyn.js';
-            
+
             Fyn.Composer.register({
                 fyn: (n, t) => `/node_modules/@fyn-software/suite/${t}/${n.join('/')}.${t}`,
                 cpb: (n, t) => `/${t}/${ n.join('/')}.${t}`,
             });
 
             Fyn.Component.load('cpb-editor');
+            Fyn.Component.load('cpb-voyage');
         </script>
 
         <link rel="stylesheet" type="text/css" href="/node_modules/@fyn-software/suite/css/style.css">
