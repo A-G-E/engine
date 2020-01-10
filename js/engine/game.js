@@ -111,7 +111,7 @@ export default class Game extends EventTarget
 
                 const delta = (position[0] - start[0]) / 50;
 
-                angle = startAngle - delta;
+                angle = (startAngle - delta) % 360;
             },
         });
 
