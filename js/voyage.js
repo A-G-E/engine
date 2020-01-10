@@ -36,6 +36,6 @@ export default class Voyage extends Fyn.Component
         });
 
         const observer = new ResizeObserver(([ e ]) => this.#game.resize(e.contentRect.width, e.contentRect.height));
-        observer.observe(this);
+        observer.observe(canvas);
     }
 }
