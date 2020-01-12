@@ -40,17 +40,18 @@ export default class Game extends EventTarget
             resized: () => this.#camera.projection = this.#renderer.projection,
         });
 
-        const bones = Array.from(Array(150), i => new Bone(this.#renderer.context, 1));
         const susan = new Obj(this.#renderer.context, await fetch('/assets/monkey.obj').then(r => r.text()));
 
         const vegeta = new Gltf(this.#renderer.context, '/assets/', 'vegeta');
         vegeta.program.world = Matrix4.identity.points;
-        // vegeta.program.world = Matrix4.identity.translate(new Vector3(0, 0, -3)).points;
+
+        const roborex = new Gltf(this.#renderer.context, '/assets/', 'robo_trex');
+        roborex.program.world = Matrix4.identity.translate(new Vector3(-1.5, 0, 0)).points;
 
         // const monster = new Gltf(this.#renderer.context, '/assets/', 'Monster');
         // monster.program.world = Matrix4.identity.translate(new Vector3(.15, 0, -.25)).scale(new Vector3(.025)).rotate(-90, new Vector3(1, 0, 0)).points;
 
-        const d = 1.25;
+        const d = 2.25;
         let angle = 45;
 
         const draw = () => {
@@ -72,21 +73,16 @@ export default class Game extends EventTarget
                 .translate(new Vector3(0, .6, .3))
                 .points;
 
-            let m = Matrix4.identity.translate(new Vector3(-4, 0, 0));
-            const modifier = Math.sin(performance.now() * .0005);
-            const translation = new Vector3(0, 1, 0);
-
-            for(const bone of bones)
-            {
-                bone.world = m;
-
-                m = m.translate(translation)
-                    .rotate(60 * modifier, new Vector3(1, -Math.abs(.05 * modifier), 0));
-            }
-
             requestAnimationFrame(draw);
         };
         draw();
+
+        this.#renderer.add(new Grid(this.#renderer.context));
+        this.#renderer.add(susan);
+        this.#renderer.add(vegeta);
+        this.#renderer.add(roborex);
+        // this.#renderer.add(monster);
+        this.#renderer.play();
 
         let moving = false;
         let start = null;
@@ -114,13 +110,6 @@ export default class Game extends EventTarget
                 angle = (startAngle - delta) % 360;
             },
         });
-
-        this.#renderer.add(new Grid(this.#renderer.context));
-        bones.forEach(b => this.#renderer.add(b));
-        this.#renderer.add(susan);
-        this.#renderer.add(vegeta);
-        // this.#renderer.add(monster);
-        this.#renderer.play();
     }
 
     resize(w, h)

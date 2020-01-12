@@ -33,6 +33,11 @@ export default class Voyage extends Fyn.Component
             mousemove: e => {
                 this.#game.emit('mouse', { position: [ e.x, e.y ], buttons });
             },
+            mouseleave: e => {
+                buttons = buttons.map(b => 0);
+
+                this.#game.emit('mouse', { position: [ e.x, e.y ], buttons });
+            },
         });
 
         const observer = new ResizeObserver(([ e ]) => this.#game.resize(e.contentRect.width, e.contentRect.height));
