@@ -6,23 +6,16 @@ export default class Vao
     #vao;
     #program;
     #attributes;
+    #mode = null;
     #buffers = [];
 
-    constructor(context, program, vertices = null, indices = null)
+    constructor(context, program, mode = null)
     {
         this.#context = context;
         this.#vao = context.createVertexArray();
         this.#program = program;
         this.#attributes = program.attributes;
-
-        if(vertices !== null)
-        {
-            this.vertices = vertices;
-        }
-        if(indices !== null)
-        {
-            this.indices = indices;
-        }
+        this.#mode = mode;
 
         const define = (variable, key, size) => {
             Object.defineProperty(this, variable, {
@@ -71,11 +64,11 @@ export default class Vao
             switch(buffer.target)
             {
                 case this.#context.ELEMENT_ARRAY_BUFFER:
-                    this.#context.drawElements(type, buffer.buffer.length, this.#context.UNSIGNED_SHORT, 0);
+                    this.#context.drawElements(this.#mode ?? type, buffer.buffer.length, this.#context.UNSIGNED_SHORT, 0);
                     break;
 
                 case this.#context.ARRAY_BUFFER:
-                    this.#context.drawArrays(type, 0, buffer.buffer.length);
+                    this.#context.drawArrays(this.#mode ?? type, 0, buffer.buffer.length);
                     break;
             }
         }
@@ -99,9 +92,9 @@ export default class Vao
         return this;
     }
 
-    set vertices(v)
+    set mode(mode)
     {
-        throw new Error('Obsolete');
+        this.#mode = mode;
     }
 
     set indices(i)

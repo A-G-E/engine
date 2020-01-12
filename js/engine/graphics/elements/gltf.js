@@ -5,7 +5,7 @@ import { Matrix4 } from '../../../math/exports.js';
 const v = `#version 300 es
     precision mediump float;
     
-    in vec3 vertex;
+    in vec3 position;
     in vec3 normal;
     
     uniform mat4 world;
@@ -20,7 +20,7 @@ const v = `#version 300 es
     void main(void) {
         v_normal = (world * vec4(normal, 1.0)).xyz;
         
-        gl_Position = projection * view * world * vec4(vertex, 1.0);
+        gl_Position = projection * view * world * vec4(position, 1.0);
     }
 `;
 const f = `#version 300 es
@@ -185,39 +185,30 @@ export default class Gltf extends Renderable
                 // this.baseMatrix = new Matrix4.fromColumnMajor(node.matrix);
             }
 
-            for(const primitive of mesh.primitives)
+            for(const p of mesh.primitives)
             {
-                primitive.mode = primitive.mode ?? this.context.TRIANGLES;
+                const vao = new Vao(this.context, this.program, p.mode ?? this.context.TRIANGLES);
 
-                if(primitive.hasOwnProperty('indices'))
+                if(p.hasOwnProperty('indices'))
                 {
-                    primitive.indices = await parseAccessor(primitive.indices);
-                    primitive.indices.drawType = 'elements';
+                    vao.indices = (await parseAccessor(p.indices)).data;
                 }
 
-                for(const [ type, value ] of Object.entries(primitive.attributes))
+                for(const [ attribute, accessor ] of Object.entries(p.attributes))
                 {
-                    primitive[type.match(/^[a-z]+/i)[0].toLowerCase()] = await parseAccessor(value);
+                    vao[attribute.match(/^[a-z]+/i)[0].toLowerCase()] = await parseAccessor(accessor);
                 }
 
-                delete primitive.attributes;
-
-                primitive.vao = new Vao(this.context, this.program);
-                primitive.vao.indices = primitive.indices.data;
-                primitive.vao.vertex = primitive.position;
-                primitive.vao.normal = primitive.normal;
-
-                this.#primitives.push(primitive);
+                this.#primitives.push(vao);
             }
         }
     }
 
     render(renderer)
     {
-        for(const primitive of this.#primitives)
+        for(const vao of this.#primitives)
         {
-            // primitive.vao.draw(this.context.LINES);
-            primitive.vao.draw(primitive.mode);
+            vao.draw();
         }
     }
 }
