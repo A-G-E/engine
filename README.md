@@ -9,6 +9,7 @@ Atomic Game Engine
   - [ ] skin
   - [ ] materials
 - [ ] WASM options (I want to figure out if and where WASM is a tool to improve the engine)
+- [ ] Armatures
 - [ ] IK rigging system
 - [ ] procedural animations
 - [ ] unity-esc componennt system
