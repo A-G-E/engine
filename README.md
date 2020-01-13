@@ -15,8 +15,9 @@ Atomic Game Engine
 - [ ] IK rigging system
 - [ ] Procedural animations
 - [ ] Free-running / climbing system utilizing the procedural animations ([Animation Bootcamp: An Indie Approach to Procedural Animation](https://www.youtube.com/watch?v=LNidsMesxSE))
-- [ ] unity-esc componennt system
-- [ ] many, many more. But I need to start somewhere
+- [ ] Unity-esc componennt system
+- [ ] Migrate to generator / iterator where possible to save on iteration, this should improve performance
+- [ ] Many, many more. But I need to start somewhere
 
 # Want to help?
 I will very gladly accept help. But do note: this engine isn't trying to be the best, or newest. This engine is ment as my playground to learn what goes into a good developed engine. therefor I love to get feedback ;).
