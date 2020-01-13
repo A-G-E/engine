@@ -11,7 +11,8 @@ Atomic Game Engine
 - [ ] WASM options (I want to figure out if and where WASM is a tool to improve the engine)
 - [ ] Armatures
 - [ ] IK rigging system
-- [ ] procedural animations
+- [ ] Procedural animations
+- [ ] Free-running / climbing system utilizing the procedural animations ([Animation Bootcamp: An Indie Approach to Procedural Animation](https://www.youtube.com/watch?v=LNidsMesxSE))
 - [ ] unity-esc componennt system
 - [ ] many, many more. But I need to start somewhere
 
