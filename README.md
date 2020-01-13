@@ -6,9 +6,10 @@ Atomic Game Engine
 - [x] Offscreen canvas
 - [x] .obj file parsing
 - [ ] .gltf file parsing
-  - [x] meches
-  - [ ] skin
-  - [ ] materials
+  - [x] Meches
+  - [ ] Skin
+  - [ ] Materials
+  - [ ] Animations
 - [ ] WASM options (I want to figure out if and where WASM is a tool to improve the engine)
 - [ ] Armatures
 - [ ] IK rigging system
