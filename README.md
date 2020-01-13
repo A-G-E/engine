@@ -2,7 +2,8 @@
 Atomic Game Engine
 
 # TODO's
-- [x] offscreen canvas
+- [x] Switch from WebGL 1 to 2
+- [x] Offscreen canvas
 - [x] .obj file parsing
 - [ ] .gltf file parsing
   - [x] meches
