@@ -36,6 +36,7 @@ export default class Renderer extends EventTarget
         this.#context.clearColor(.2, .2, .2, 1);
         this.#context.enable(this.#context.DEPTH_TEST);
         this.#context.enable(this.#context.CULL_FACE);
+        this.#context.enable(this.#context.BLEND);
         this.#context.frontFace(this.#context.CCW);
         this.#context.cullFace(this.#context.BACK);
         this.#context.depthFunc(this.#context.LEQUAL);

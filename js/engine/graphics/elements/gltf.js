@@ -1,6 +1,8 @@
 import Renderable from '../renderable.js';
 import Vao from '../vao.js';
 import { Matrix4 } from '../../../math/exports.js';
+import Armature from '../../armature/armature.js';
+import Joint from '../../armature/joint.js';
 
 const v = `#version 300 es
     precision mediump float;
@@ -39,7 +41,7 @@ const f = `#version 300 es
     
     void main(void) {
         float diffAngle = max(dot(v_normal, normalize(light.position - v_normal)), 0.0);
-        color = vec4(baseColor + light.color * diffAngle, 1.0);
+        color = vec4(baseColor + light.color * diffAngle, 0.9);
     }
 `;
 
@@ -87,6 +89,7 @@ export default class Gltf extends Renderable
     #skin;
     #armature;
     #primitives = [];
+    #parsing = Promise.resolve(null);
 
     baseMatrix = Matrix4.identity;
 
@@ -95,7 +98,17 @@ export default class Gltf extends Renderable
         super(context);
         super.init(v, f);
 
-        this.parse(path, name);
+        this.#parsing = this.parse(path, name);
+    }
+
+    get parsing()
+    {
+        return this.#parsing;
+    }
+
+    get armature()
+    {
+        return this.#armature;
     }
 
     async parse(path, name)
@@ -201,6 +214,29 @@ export default class Gltf extends Renderable
 
                 this.#primitives.push(vao);
             }
+
+            const traverse = (i, p = null) => {
+                const node = content.nodes[i];
+
+                const bone = new Joint(
+                    node?.name?.replace('mixamorig:', '') ?? null,
+                    p,
+                    {
+                        translation: node.translation ?? [ 0, 0, 0 ],
+                        rotation: node.rotation ?? [ 1, 1, 1, 0 ],
+                        scale: node.scale ?? [ 0, 0, 0 ],
+                    },
+                );
+
+                if(node.hasOwnProperty('children'))
+                {
+                    bone.children = node.children.map(c => traverse(c, bone));
+                }
+
+                return bone;
+            };
+
+            this.#armature = new Armature(traverse(skin.joints[0]));
         }
     }
 
