@@ -38,6 +38,9 @@ export default class Voyage extends Fyn.Component
 
                 this.#game.emit('mouse', { position: [ e.x, e.y ], buttons });
             },
+            wheel: e => {
+                this.#game.emit('wheel', Math.sign(e.deltaY));
+            },
         });
 
         const observer = new ResizeObserver(([ e ]) => this.#game.resize(e.contentRect.width, e.contentRect.height));

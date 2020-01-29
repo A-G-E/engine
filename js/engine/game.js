@@ -33,7 +33,7 @@ export default class Game extends EventTarget
     {
         const light = new Ubo(this.#renderer.context, 'lighting', {
             position: new Vector3(5.0, 3.0, 5.0),
-            color: new Vector3(0.25, 0.25, 0.25),
+            color: new Vector3(0.15, 0.15, 0.15),
         });
 
         this.#renderer.on({
@@ -41,37 +41,25 @@ export default class Game extends EventTarget
         });
 
         const susan = new Obj(this.#renderer.context, await fetch('/assets/monkey.obj').then(r => r.text()));
-
         const vegeta = new Gltf(this.#renderer.context, '/assets/', 'vegeta');
-        vegeta.program.world = Matrix4.identity.points;
 
         const roborex = new Gltf(this.#renderer.context, '/assets/', 'robo_trex');
-        roborex.program.world = Matrix4.identity.translate(new Vector3(-1.5, 0, 0)).points;
+        roborex.world = Matrix4.identity.translate(new Vector3(-1.5, 0, 0));
 
         // const monster = new Gltf(this.#renderer.context, '/assets/', 'Monster');
         // monster.program.world = Matrix4.identity.translate(new Vector3(.15, 0, -.25)).scale(new Vector3(.025)).rotate(-90, new Vector3(1, 0, 0)).points;
 
-        const d = 2.25;
-        let angle = 45;
+        let d = 1.25;
+        let angle = [ 0, 0 ];
 
         const draw = () => {
             const r = performance.now() * .0005;
 
-            // angle = r;
-
-            this.#camera.view = Matrix4.lookAt(
-                new Vector3(d * Math.sin(angle), d, d * Math.cos(angle)),
-                new Vector3(0, 1, 0),
-                new Vector3(0, 1, 0)
-            );
-            light.position = new Vector3(d * Math.sin(angle), d * 1.2, d * Math.cos(angle));
-
-            susan.program.world = Matrix4.identity
+            susan.world = Matrix4.identity
                 .translate(new Vector3(2.5, 1.5, 0))
                 .scale(new Vector3(.5, .5, .5))
                 .rotate(25 * Math.sin(r * 5), new Vector3(1, 0, 0))
-                .translate(new Vector3(0, .6, .3))
-                .points;
+                .translate(new Vector3(0, .6, .3));
 
             requestAnimationFrame(draw);
         };
@@ -82,7 +70,37 @@ export default class Game extends EventTarget
         this.#renderer.add(vegeta);
         this.#renderer.add(roborex);
         // this.#renderer.add(monster);
+
+        await vegeta.parsing;
+        const armatureWalker = (matrix, joint) => {
+            const bone = new Bone(this.#renderer.context);
+            const m = matrix
+                .translate(new Vector3(...joint.transform.translation))
+                .rotate(joint.transform.rotation[0], new Vector3(...joint.transform.rotation.slice(1)))
+
+            bone.world = m.scale(new Vector3(...joint.transform.scale));
+            this.#renderer.add(bone);
+
+            for(const c of joint.children ?? [])
+            {
+                armatureWalker(m, c);
+            }
+        };
+
+        armatureWalker(Matrix4.identity, vegeta.armature.bones);
+
         this.#renderer.play();
+
+        const updateCamera = () => {
+            const position = new Vector3(
+                d * Math.sin(angle[0]),
+                d * (1 + Math.cos(angle[1])),
+                d * Math.cos(angle[0]),
+            );
+
+            this.#camera.view = Matrix4.lookAt(position.clone, new Vector3(0, 1, 0), new Vector3(0, 1, 0));
+            light.position = position.clone;
+        };
 
         let moving = false;
         let start = null;
@@ -105,11 +123,26 @@ export default class Game extends EventTarget
                     startAngle = angle;
                 }
 
-                const delta = (position[0] - start[0]) / 50;
+                const delta = [
+                    (position[0] - start[0]) / 50,
+                    (position[1] - start[1]) / 100,
+                ];
 
-                angle = (startAngle - delta) % 360;
+                angle = [
+                    (startAngle[0] - delta[0]) % 360,
+                    Math.clamp(0, 3, startAngle[1] - delta[1]),
+                ];
+
+                updateCamera();
+            },
+            wheel: delta => {
+                d = Math.clamp(1.25, 5.25, d + delta);
+
+                updateCamera();
             },
         });
+
+        updateCamera();
     }
 
     resize(w, h)

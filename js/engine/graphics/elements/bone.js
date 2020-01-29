@@ -45,6 +45,8 @@ const f = `#version 300 es
 
 export default class Bone extends Renderable
 {
+    #length;
+
     constructor(context, length)
     {
         super(context);
@@ -68,7 +70,7 @@ export default class Bone extends Renderable
                 -.1, .25, -.1,
                  .1, .25, -.1,
                   0,   1,   0,
-            ]), drawType: 'arrays' };
+            ]), target: context.ARRAY_BUFFER };
         this.vao.normal = { dataView: new Float32Array([
                 0, -1,  0,
                 0,  0, -1,
@@ -76,27 +78,14 @@ export default class Bone extends Renderable
                 0,  0,  1,
                 0,  1,  0,
                 0,  1,  0,
-            ]), drawType: 'arrays' };
+            ]), target: context.ARRAY_BUFFER };
 
         this.world = Matrix4.identity;
-        this._length = length;
+        this.#length = length;
     }
 
     get length()
     {
-        return this._length;
-    }
-
-    get world()
-    {
-        return this._world;
-    }
-
-    set world(m)
-    {
-        m = m.scale(new Vector3(this._length / 2, this._length, this._length / 2));
-
-        this._world = m;
-        this.program.world = m.points;
+        return this.#length;
     }
 }
