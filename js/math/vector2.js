@@ -125,11 +125,9 @@ export default class Vector2
         this.y = magnitude * Math.sin(angle * Math.PI / 180);
     }
 
-    get snapped()
+    snapped(steps = 8)
     {
-        // TODO(Chris Kruining) Turn this getter into a method taking steps as the argument
-        const steps = 8;
-        const interval = 360 / steps;
+        const interval = 360 / (Math.abs(steps) % 360);
         return this.clone.angle = (Math.round((this.angle % 360 + 180) / interval) * interval - 180);
     }
 
