@@ -126,44 +126,10 @@ export default class Vector2
 
     get snapped()
     {
-        let angle = this.angle % 360 + 180;
-
-        if(angle <= 22.5 || angle >= 337.5)
-        {
-            angle = 0;
-        }
-        else if(angle <= 67.5)
-        {
-            angle = 45;
-        }
-        else if(angle <= 112.5)
-        {
-            angle = 90;
-        }
-        else if(angle <= 157.5)
-        {
-            angle = 135;
-        }
-        else if(angle <= 202.5)
-        {
-            angle = 180;
-        }
-        else if(angle <= 247.5)
-        {
-            angle = 225;
-        }
-        else if(angle <= 292.5)
-        {
-            angle = 270;
-        }
-        else if(angle < 337.5)
-        {
-            angle = 315;
-        }
-
-        angle -= 180;
-
-        return this.clone.angle = angle;
+        // TODO(Chris Kruining) Turn this getter into a method taking steps as the argument
+        const steps = 8;
+        const interval = 360 / steps;
+        return this.clone.angle = (Math.round((this.angle % 360 + 180) / interval) * interval - 180);
     }
 
     get clone()
