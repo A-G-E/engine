@@ -1,11 +1,12 @@
 export default class Vector2
 {
+    #x;
+    #y;
+
     constructor(x, y)
     {
-        this._x = x;
-        this._y = y !== undefined
-            ? y
-            : x;
+        this.#x = x;
+        this.#y = y ?? x;
     }
 
     normalize()
@@ -83,22 +84,22 @@ export default class Vector2
 
     get x()
     {
-        return this._x;
+        return this.#x;
     }
 
     set x(x)
     {
-        this._x = x;
+        this.#x = x;
     }
 
     get y()
     {
-        return this._y;
+        return this.#y;
     }
 
     set y(y)
     {
-        this._y = y;
+        this.#y = y;
     }
 
     get points()
