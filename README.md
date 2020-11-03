@@ -14,6 +14,7 @@ Atomic Game Engine
 - [ ] Armatures
 - [ ] IK rigging system
 - [ ] Procedural animations
+  - [ ] JALI facial animation (https://www.youtube.com/watch?v=uFIxiz0jwRE)
 - [ ] Free-running / climbing system utilizing the procedural animations ([Animation Bootcamp: An Indie Approach to Procedural Animation](https://www.youtube.com/watch?v=LNidsMesxSE))
 - [ ] Unity-esc component system
 - [ ] Migrate to generator / iterator where possible to save on iteration, this should improve performance
